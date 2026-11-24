@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sheila's Space</title>
+<meta name="description" content="Sheila's personal space">
+<meta name="theme-color" content="#ebe1d3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1713" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sheila">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday and tender: a private notebook, calm and warm
+   IDEA a linen-bound planner with tabbed sections and tucked-in cards
+   PICTURE home: this week's grid of filled days (lakad, pasasalamat, check-in) beside today's verse
+   COLOUR beige linen ground, oat paper cards, espresso ink, dusty rose accent, sage for growth
+   TYPE Instrument Serif titles + DM Sans text
+   LAYOUT tab row on top; laptop: two-column cards; phone: one column, tabs scroll sideways */
+:root{color-scheme:light dark;
+--bg:light-dark(#ebe1d3,#1c1713);
+--paper:light-dark(#f8f3ec,#27201b);
+--paper2:light-dark(#f1e9de,#2f2721);
+--ink:light-dark(#2a211b,#f0e7dc);
+--soft:light-dark(#6f6155,#b9aa9a);
+--line:light-dark(#d9ccbb,#43382f);
+--rose:light-dark(#b0695e,#e0a196);
+--roseBg:light-dark(#efd9d2,#4a2e29);
+--sage:light-dark(#6f7d5c,#a9b98f);
+--sageBg:light-dark(#dfe3d2,#323a28);
+--taupe:light-dark(#a38c76,#8c7764)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "DM Sans",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Instrument Serif",Georgia,serif;font-weight:400;line-height:1.05;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h1{font-size:clamp(36px,6vw,52px)}
+h2{font-size:clamp(30px,4.5vw,40px)}
+h3{font-size:24px}
+p{margin:0}
+a{color:var(--rose)}
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) max(5vw,16px) 4px}
+.brand b{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:26px}
+.brand span{color:var(--soft);font-size:14px;white-space:nowrap}
+nav{display:flex;gap:6px;overflow-x:auto;padding:6px max(5vw,16px) 10px;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:none;text-decoration:none;color:var(--ink);font-size:14px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper);min-height:38px;display:flex;align-items:center}
+nav a.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{max-width:1180px;margin:0 auto;padding:clamp(20px,3vw,40px) max(5vw,16px) 80px}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 20px;margin-bottom:20px}
+.head p{color:var(--soft);max-width:60ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px;align-items:start}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:20px}
+.card.tint{background:var(--paper2)}
+.card h3{margin-bottom:12px}
+.stack>*+*{margin-top:12px}
+label{display:block;font-size:14px;color:var(--soft);margin-bottom:4px}
+input,select,textarea{width:100%;font:16px/1.4 "DM Sans",system-ui,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-height:44px}
+textarea{min-height:110px;resize:vertical}
+input[type=range]{padding:0;border:0;background:none;accent-color:var(--rose);min-height:32px}
+input[type=checkbox]{width:22px;height:22px;min-height:0;accent-color:var(--sage);margin:0;flex:none}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,nav a:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));gap:10px}
+button{font:500 15px "DM Sans",system-ui,sans-serif;min-height:44px;padding:10px 18px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button.sm{min-height:36px;padding:6px 12px;font-size:14px}
+button.del{background:transparent;color:var(--rose);border-color:transparent;padding-inline:8px}
+button:active{transform:translateY(1px)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.muted{color:var(--soft);font-size:14px}
+.empty{color:var(--soft);text-align:center;padding:28px 12px;border:1px dashed var(--line);border-radius:14px}
+.chip{display:inline-block;font-size:13px;padding:3px 10px;border-radius:999px;background:var(--roseBg);color:var(--ink);white-space:nowrap}
+.chip.g{background:var(--sageBg)}
+.chip.n{background:var(--paper2);border:1px solid var(--line)}
+.bar{height:10px;border-radius:99px;background:var(--paper2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--rose);border-radius:99px}
+.bar.g i{background:var(--sage)}
+.big{font-family:"Instrument Serif",Georgia,serif;font-size:clamp(34px,6vw,46px);line-height:1;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.stat small{display:block;color:var(--soft);font-size:13px}
+.stat b{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:30px;white-space:nowrap}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+.list li:first-child{border-top:0}
+.num{white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.pos{color:var(--sage)}.neg{color:var(--rose)}
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.verse{background:var(--ink);color:var(--bg);border-radius:22px;padding:clamp(22px,3vw,36px);display:flex;flex-direction:column;justify-content:space-between;gap:18px;min-height:300px}
+.verse q{font-family:"Instrument Serif",Georgia,serif;font-size:clamp(24px,3.2vw,32px);line-height:1.2;quotes:none}
+.verse .ref{font-size:14px;opacity:.8}
+.week{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:clamp(18px,2.5vw,28px)}
+.wk{display:grid;grid-template-columns:7.5em repeat(7,minmax(0,1fr));gap:6px;align-items:center;margin-top:14px}
+.wk .d{text-align:center;font-size:13px;color:var(--soft)}
+.wk .d.t{color:var(--ink);font-weight:700}
+.wk .l{font-size:14px}
+.cell{aspect-ratio:1;border-radius:10px;background:var(--paper2);border:1px solid var(--line)}
+.cell.f1{background:var(--sage);border-color:var(--sage)}
+.cell.f2{background:var(--rose);border-color:var(--rose)}
+.cell.f3{background:var(--taupe);border-color:var(--taupe)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:10px;margin-top:16px}
+.tile{display:block;text-decoration:none;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;min-height:96px}
+.tile b{display:block;font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:22px;line-height:1.1}
+.tile span{font-size:13px;color:var(--soft)}
+/* vision */
+.board{columns:3 260px;column-gap:14px}
+.vc{break-inside:avoid;margin-bottom:14px;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.vc img{display:block;width:100%;height:auto}
+.vc .ph{aspect-ratio:4/3;display:grid;place-items:center;padding:20px;text-align:center;font-family:"Instrument Serif",Georgia,serif;font-size:28px;line-height:1.1}
+.vc .in{padding:14px 16px}
+.vc.done{opacity:.75}
+/* chart */
+.fig{position:relative;min-height:220px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+svg text{font:13px "DM Sans",sans-serif;fill:var(--soft);paint-order:stroke;stroke:var(--paper);stroke-width:4px}
+/* breathing */
+.breath{display:grid;place-items:center;height:190px}
+.circ{width:80px;height:80px;border-radius:50%;background:var(--sageBg);border:2px solid var(--sage);display:grid;place-items:center;font-size:14px}
+.circ.go{animation:br 16s ease-in-out infinite}
+@keyframes br{0%{transform:scale(1)}25%{transform:scale(2)}50%{transform:scale(2)}75%{transform:scale(1)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.circ.go{animation:none}}
+.help{background:var(--roseBg);border-radius:16px;padding:16px 18px}
+.checks label{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:15px;margin:0;padding:6px 0;min-height:40px}
+.sealed{background:var(--paper2);border:1px dashed var(--taupe)}
+details summary{cursor:pointer;min-height:40px;display:flex;align-items:center}
+.modal{position:fixed;inset:0;background:rgb(0 0 0/.4);display:grid;place-items:center;padding:16px;z-index:20}
+.modal .card{max-width:420px;width:100%}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;z-index:30;max-width:90vw}
+.warn{background:var(--roseBg);padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:14px}
+@media(max-width:760px){.hero{grid-template-columns:minmax(0,1fr)}.verse{min-height:0}}
+@media(max-width:420px){.wk{grid-template-columns:6.2em repeat(7,minmax(0,1fr));gap:4px}.wk .l{font-size:13px}}
+.brand .tg{min-height:34px;padding:4px 12px;font-size:13px;background:transparent;color:var(--ink);border-color:var(--line)}
+nav.sub{padding-top:0}
+nav.sub a{font-size:13px;min-height:34px;padding:6px 12px;background:transparent}
+nav.sub a.on{background:var(--roseBg);color:var(--ink);border-color:var(--rose)}
+.hgrid{display:grid;grid-template-columns:minmax(7em,1.6fr) repeat(7,minmax(0,1fr)) 3.2em;gap:6px;align-items:center}
+.hgrid .d{text-align:center;font-size:13px;color:var(--soft)}
+.hc{aspect-ratio:1;border-radius:10px;border:1px solid var(--line);background:var(--paper2);padding:0;min-height:0;width:100%;cursor:pointer}
+.hc.on{background:var(--sage);border-color:var(--sage)}
+.chap{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;margin-top:8px}
+.chap button{min-height:40px;padding:0;border-radius:10px;background:var(--paper2);color:var(--ink);border-color:var(--line);font-size:13px}
+.chap button.on{background:var(--sage);border-color:var(--sage);color:#fff}
+.jar{background:var(--ink);color:var(--bg);border-radius:22px;padding:clamp(22px,3vw,34px);min-height:200px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.jar p.big2{font-family:"Instrument Serif",Georgia,serif;font-size:clamp(26px,4vw,36px);line-height:1.15}
+.tl{position:relative;padding-left:26px;list-style:none;margin:0}
+.tl:before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl>li{position:relative;margin-bottom:18px}
+.tl>li:before{content:"";position:absolute;left:-23px;top:8px;width:12px;height:12px;border-radius:50%;background:var(--rose);border:2px solid var(--bg)}
+.tl img{display:block;max-width:100%;border-radius:14px;margin-top:8px}
+.cd{display:flex;align-items:center;gap:14px}
+.cd .big{min-width:2.2em;text-align:center}
+.task{display:flex;align-items:center;gap:10px}
+.task.done span{text-decoration:line-through;color:var(--soft)}
+.hn0{}
+@media(max-width:520px){.hgrid{grid-template-columns:repeat(7,minmax(0,1fr)) 2.6em;gap:5px}.hgrid .hn{grid-column:1/-1;margin-top:6px}.hgrid .hn0{display:none}}
+.ring{display:grid;place-items:center;width:150px;height:150px;border-radius:50%;margin:0 auto}
+.ring div{width:118px;height:118px;border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;line-height:1.1}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b id="appName">Sheila's Space</b><div class="btns" style="align-items:center"><span id="todayLbl"></span><button class="tg" id="themeBtn" type="button">Dark mode</button></div></div>
+  <nav id="nav" aria-label="Sections"></nav>
+  <nav id="sub" class="sub" aria-label="Pages"></nav>
+</header>
+<main id="view"></main>
+<div id="layer"></div>
+<script>
+{
+const NAMES={home:'Home',wellness:'Self-Care',habits:'Habits',sleep:'Sleep',cycle:'Cycle',journal:'Journal',gratitude:'Gratitude',comfort:'Comfort Box',letters:'Future Me',verse:'Daily Verse',prayer:'Prayer Journal',reading:'Bible Reading',budget:'Budget',bills:'Bills',wishlist:'Wishlist',planner:'Planner',vision:'Vision Board',walk:'Walking',corner:'Savings & Travel',dates:'Date Jar',important:'Special Dates',memories:'Memories',backup:'Settings'};
+const GROUPS=[['Home',['home']],['Me',['wellness','habits','sleep','cycle','journal','gratitude','comfort','letters']],['Faith',['verse','prayer','reading']],['Money',['budget','bills','wishlist']],['Goals',['planner','vision','walk']],['Allen & Sheila',['corner','dates','important','memories']],['Settings',['backup']]];
+const TABS=GROUPS.flatMap(g=>g[1]).map(k=>[k,NAMES[k]]);
+const VERSES=[
+ ['Philippians 4:6-7','Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God. And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus.'],
+ ['Isaiah 41:10','Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness.'],
+ ['1 Peter 5:7','Casting all your care upon him; for he careth for you.'],
+ ['Matthew 11:28','Come unto me, all ye that labour and are heavy laden, and I will give you rest.'],
+ ['Psalm 34:18','The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.'],
+ ['Jeremiah 29:11','For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.'],
+ ['Proverbs 3:5-6','Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.'],
+ ['Psalm 46:1','God is our refuge and strength, a very present help in trouble.'],
+ ['Joshua 1:9','Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest.'],
+ ['John 14:27','Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.'],
+ ['Psalm 23:1','The LORD is my shepherd; I shall not want.'],
+ ['Romans 8:28','And we know that all things work together for good to them that love God, to them who are the called according to his purpose.'],
+ ['2 Timothy 1:7','For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.'],
+ ['Lamentations 3:22-23','It is of the LORD’s mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.'],
+ ['Psalm 147:3','He healeth the broken in heart, and bindeth up their wounds.'],
+ ['Isaiah 40:31','But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint.'],
+ ['Philippians 4:13','I can do all things through Christ which strengtheneth me.'],
+ ['Psalm 118:24','This is the day which the LORD hath made; we will rejoice and be glad in it.'],
+ ['Matthew 6:34','Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself. Sufficient unto the day is the evil thereof.'],
+ ['Psalm 56:3','What time I am afraid, I will trust in thee.'],
+ ['Zephaniah 3:17','The LORD thy God in the midst of thee is mighty; he will save, he will rejoice over thee with joy; he will rest in his love, he will joy over thee with singing.'],
+ ['1 Thessalonians 5:18','In every thing give thanks: for this is the will of God in Christ Jesus concerning you.'],
+ ['Psalm 121:1-2','I will lift up mine eyes unto the hills, from whence cometh my help. My help cometh from the LORD, which made heaven and earth.'],
+ ['2 Corinthians 12:9','And he said unto me, My grace is sufficient for thee: for my strength is made perfect in weakness.'],
+ ['Psalm 55:22','Cast thy burden upon the LORD, and he shall sustain thee: he shall never suffer the righteous to be moved.'],
+ ['Romans 15:13','Now the God of hope fill you with all joy and peace in believing, that ye may abound in hope, through the power of the Holy Ghost.'],
+ ['Psalm 37:4','Delight thyself also in the LORD; and he shall give thee the desires of thine heart.'],
+ ['Proverbs 16:3','Commit thy works unto the LORD, and thy thoughts shall be established.'],
+ ['Deuteronomy 31:8','And the LORD, he it is that doth go before thee; he will be with thee, he will not fail thee, neither forsake thee: fear not, neither be dismayed.'],
+ ['Psalm 30:5','Weeping may endure for a night, but joy cometh in the morning.'],
+ ['Psalm 139:14','I will praise thee; for I am fearfully and wonderfully made: marvellous are thy works; and that my soul knoweth right well.']];
+const EXP=['Food','Transport','Bills','Load/Internet','Shopping','Health','Church/Tithes','Savings','Others'];
+const INC=['Salary','Side hustle','Gift','Others'];
+const VCAT=['Self','Faith','Career','Money','Health','Love','Travel','Home'];
+const MOODS=['Happy','Peaceful','Okay','Tired','Sad','Anxious','Angry'];
+const HABITS=['Prayed / read the Bible','Drank enough water','Went outside / got some sun','Walked or moved my body','Ate proper meals','Talked to someone I love','Did a breathing or grounding exercise','Took my medication (if prescribed)'];
+const TSTAT=['Dream','Planned','Booked','Visited'];
+const IDEAS=['Sunset picnic by the bay','Cook a new recipe together','Movie marathon with homemade popcorn','Coffee shop hopping in a new area','Visit a museum or art gallery','Sunday worship then brunch','Stargazing night','Board games and milk tea','Bike or walk around a park','Write each other letters and swap them'];
+const PLANS={gospels:['The four Gospels',[['Matthew',28],['Mark',16],['Luke',24],['John',21]]],nt:['New Testament',[['Matthew',28],['Mark',16],['Luke',24],['John',21],['Acts',28],['Romans',16],['1 Corinthians',16],['2 Corinthians',13],['Galatians',6],['Ephesians',6],['Philippians',4],['Colossians',4],['1 Thessalonians',5],['2 Thessalonians',3],['1 Timothy',6],['2 Timothy',4],['Titus',3],['Philemon',1],['Hebrews',13],['James',5],['1 Peter',5],['2 Peter',3],['1 John',5],['2 John',1],['3 John',1],['Jude',1],['Revelation',22]]],psalms:['Psalms',[['Psalms',150]]],proverbs:['Proverbs (31 days)',[['Proverbs',31]]]};
+const chapters=k=>PLANS[k][1].flatMap(([b,n])=>[...Array(n)].map((_,i)=>b+' '+(i+1)));
+const CKIND=['Sweet note','Photo','Song','Verse','Reminder'];
+const PRI=['Normal','Important'];
+const KEY='sheila-space-v1';
+const DEF=()=>({name:'Sheila',vision:[],tx:[],limits:{},fav:[],vnotes:{},journal:[],letters:[],checkins:{},therapy:[],gratitude:{},walks:{},walkGoal:6000,ipon:[],travel:[],theme:'auto',habits:['Drink 8 glasses of water','Take vitamins','Skincare','Sleep before 11 PM'].map((n,i)=>({id:'h'+i,name:n})),hlog:{},sleep:{},periods:[],comfort:[],prayers:[],reading:{plan:'gospels',done:{}},bills:[],wish:[],dateIdeas:IDEAS.map((t,i)=>({id:'d'+i,text:t,done:false})),dates:[],memories:[],tasks:[]});
+let storeOK=true,S=DEF();
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(DEF(),JSON.parse(r))}catch(e){storeOK=false}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){toast(storeOK?'Storage is full. Try deleting a few photos.':'Saving isn\u2019t available in this browser.');return false}};
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const peso=n=>((Number(n)||0)<0?'−':'')+'₱'+Math.abs(Number(n)||0).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const TODAY=()=>ymd(new Date());
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const nice=s=>parse(s).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)};
+const dayIdx=()=>{const d=new Date();return Math.floor((d-new Date(d.getFullYear(),0,0))/864e5)};
+const opts=(a,sel)=>a.map(x=>`<option${x===sel?' selected':''}>${esc(x)}</option>`).join('');
+const val=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+function ask(msg,yes){const L=$('#layer');L.innerHTML=`<div class="modal"><div class="card stack"><p></p><div class="btns"><button id="mYes">Yes, delete</button><button class="ghost" id="mNo">Cancel</button></div></div></div>`;L.querySelector('p').textContent=msg;$('#mNo').onclick=()=>L.innerHTML='';$('#mYes').onclick=()=>{L.innerHTML='';yes()}}
+function streak(has){let n=0,d=TODAY();if(!has(d))d=addDays(d,-1);while(has(d)){n++;d=addDays(d,-1)}return n}
+let vOff=0,ro=null,bMonth=TODAY().slice(0,7),jq='',openJ=null,cPick=null,dPick=null,pDate=TODAY();
+const daysTo=s=>Math.round((parse(s)-parse(TODAY()))/864e5);
+const nextOcc=(s,yearly)=>{if(!yearly)return s;const t=TODAY(),y=+t.slice(0,4);let n=y+s.slice(4);if(n<t)n=(y+1)+s.slice(4);return n};
+const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
+const hrs=(b,w)=>{if(!b||!w)return 0;const m=x=>{const[h,mm]=x.split(':').map(Number);return h*60+mm};return ((m(w)-m(b)+1440)%1440)/60};
+const dim=m=>new Date(+m.slice(0,4),+m.slice(5,7),0).getDate();
+const billDate=(b,m)=>m+'-'+pad(Math.min(b.due,dim(m)));
+function cycleInfo(){const p=[...S.periods].sort((a,b)=>a.start.localeCompare(b.start));if(!p.length)return null;const gaps=p.slice(1).map((x,i)=>daysTo(x.start)-daysTo(p[i].start)).filter(g=>g>=15&&g<=60).slice(-6);const avg=gaps.length?Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length):28;const lens=p.filter(x=>x.end).map(x=>daysTo(x.end)-daysTo(x.start)+1).slice(-6);const plen=lens.length?Math.round(lens.reduce((a,b)=>a+b,0)/lens.length):5;const last=p[p.length-1];return{avg,plen,last,day:-daysTo(last.start)+1,next:addDays(last.start,avg)}}
+
+const V={};
+V.home=()=>{
+ const h=new Date().getHours(),g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
+ const v=VERSES[dayIdx()%VERSES.length];
+ const days=[...Array(7)].map((_,i)=>addDays(TODAY(),i-6));
+ const rows=[['Walk','f1',d=>S.walks[d]&&S.walks[d].steps>0],['Gratitude','f2',d=>S.gratitude[d]&&S.gratitude[d].some(x=>x)],['Check-in','f3',d=>!!S.checkins[d]],['Habits','f1',d=>(S.hlog[d]||[]).length>0]];
+ const up=S.dates.map(x=>({...x,n:nextOcc(x.date,x.yearly)})).filter(x=>x.n>=TODAY()).sort((a,b)=>a.n.localeCompare(b.n))[0];
+ const due=S.bills.filter(b=>!b.paid[TODAY().slice(0,7)]),dueAmt=due.reduce((a,b)=>a+b.amt,0);
+ const td=S.tasks.filter(x=>x.date===TODAY()),tdDone=td.filter(x=>x.done).length;
+ const m=TODAY().slice(0,7),mt=S.tx.filter(t=>t.date.startsWith(m));
+ const inc=mt.filter(t=>t.type==='in').reduce((a,t)=>a+t.amt,0),out=mt.filter(t=>t.type==='out').reduce((a,t)=>a+t.amt,0);
+ const lim=S.limits[m]||0,steps=(S.walks[TODAY()]||{}).steps||0;
+ const it=S.ipon.reduce((a,x)=>a+x.target,0),is=S.ipon.reduce((a,x)=>a+x.saved,0);
+ const sealed=S.letters.filter(l=>l.open>TODAY()).length;
+ const lb=S.lastBackup,needBk=!lb||daysTo(lb)<-14;
+ return `<div class="head"><h1>${g}, ${esc(S.name)}.</h1></div>${needBk?`<div class="warn btns" style="justify-content:space-between;align-items:center"><span>${lb?'It\u2019s been a while since your last backup.':'Save a backup so your entries are safe if you change phones.'}</span><a href="#backup">Back up now</a></div>`:''}
+ <section class="hero">
+  <div class="verse"><div class="ref">Verse for today</div><q>${esc(v[1])}</q><div class="btns" style="justify-content:space-between;align-items:center"><span class="ref">${esc(v[0])} (KJV)</span><a href="#verse" style="color:inherit">Write a reflection</a></div></div>
+  <div class="week"><h3>This week</h3><p class="muted">Every filled square is a day you took care of yourself.</p>
+   <div class="wk"><span></span>${days.map(d=>`<span class="d${d===TODAY()?' t':''}">${parse(d).toLocaleDateString('en-PH',{weekday:'narrow'})}</span>`).join('')}
+   ${rows.map(r=>`<span class="l">${r[0]}</span>${days.map(d=>`<span class="cell ${r[2](d)?r[1]:''}" title="${r[0]} ${nice(d)}"></span>`).join('')}`).join('')}</div></div>
+ </section>
+ <div class="stats">
+  <div class="stat"><small>Left this month</small><b>${peso(lim?lim-out:inc-out)}</b><small>${lim?'of '+peso(lim)+' budget':'income minus expenses'}</small></div>
+  <div class="stat"><small>Steps today</small><b>${steps.toLocaleString()}</b><small>goal ${S.walkGoal.toLocaleString()}</small></div>
+  <div class="stat"><small>Our savings</small><b>${it?Math.round(is/it*100):0}%</b><small>${peso(is)} of ${peso(it)}</small></div>
+  <div class="stat"><small>Letters waiting</small><b>${sealed}</b><small>for future ${esc(S.name)}</small></div>
+  <a class="stat" href="#planner" style="text-decoration:none;color:inherit"><small>Today\u2019s to-dos</small><b>${tdDone}/${td.length}</b><small>${td.length?(td.length-tdDone)+' left':'Plan your day'}</small></a>
+  <a class="stat" href="#bills" style="text-decoration:none;color:inherit"><small>Unpaid bills this month</small><b>${peso(dueAmt)}</b><small>${due.length} ${due.length===1?'bill':'bills'}</small></a>
+  <a class="stat" href="#important" style="text-decoration:none;color:inherit"><small>${up?esc(up.title):'Special dates'}</small><b>${up?(daysTo(up.n)===0?'Today!':daysTo(up.n)+' days'):'\u2014'}</b><small>${up?nice(up.n):'Add your anniversary'}</small></a>
+ </div>
+ ${GROUPS.slice(1).map(g=>`<h2 style="margin-top:28px">${esc(g[0])}</h2><div class="tiles">${g[1].map(k=>`<a class="tile" href="#${k}"><b>${NAMES[k]}</b><span>${TIP[k]}</span></a>`).join('')}</div>`).join('')}`};
+const TIP={vision:'Dreams you want to see every day',budget:'Income, expenses and monthly budget',verse:'One verse a day',journal:'For your thoughts and feelings',letters:'Letters you can only open on a set date',wellness:'Mood, anxiety, therapy and self-care',gratitude:'Three things you\u2019re thankful for',walk:'Steps, minutes and streaks',corner:'Our savings and travel goals',backup:'Name, theme, backup and restore',habits:'Your own daily habits and streaks',sleep:'Bedtime, wake time and sleep quality',cycle:'Period log and next-cycle prediction',comfort:'Open this on heavy days',prayer:'Prayer requests and answered prayers',reading:'Chapter-by-chapter reading plan',bills:'Monthly bills and due dates',wishlist:'Things to save up for',planner:'Daily to-do list',dates:'Date ideas and a random pick',important:'Countdowns to the days that matter',memories:'Our story, one moment at a time'};
+
+V.vision=()=>`<div class="head"><div><h1>Vision Board</h1><p>Pin the things you want to happen in your life. You can add a photo to each one.</p></div></div>
+ <div class="grid" style="grid-template-columns:minmax(0,1fr)">
+ <details class="card tint"${S.vision.length?'':' open'}><summary><h3 style="margin:0">Add a dream</h3></summary>
+  <form id="fVision" class="stack" style="margin-top:12px"><div class="row"><div><label for="vT">Dream</label><input id="vT" required placeholder="e.g. A home with a garden"></div><div><label for="vC">Category</label><select id="vC">${opts(VCAT)}</select></div></div>
+  <div><label for="vN">Why does this matter to you?</label><input id="vN"></div><div><label for="vI">Photo (optional)</label><input id="vI" type="file" accept="image/*"></div><button>Add to board</button></form></details></div>
+ <div style="margin-top:16px">${S.vision.length?`<div class="board">${S.vision.map(x=>`<div class="vc${x.done?' done':''}">${x.img?`<img src="${esc(x.img)}" alt="">`:`<div class="ph" style="background:${x.done?'var(--sageBg)':'var(--roseBg)'}">${esc(x.title)}</div>`}<div class="in stack"><div class="btns" style="justify-content:space-between;align-items:center"><span class="chip${x.done?' g':''}">${x.done?'Achieved':esc(x.cat)}</span><span><button class="sm ghost" data-a="vdone" data-id="${x.id}">${x.done?'Undo':'Achieved!'}</button><button class="sm del" data-a="vdel" data-id="${x.id}">Delete</button></span></div>${x.img?`<b>${esc(x.title)}</b>`:''}${x.note?`<p class="muted">${esc(x.note)}</p>`:''}</div></div>`).join('')}</div>`:'<p class="empty">Your board is empty. Start with one dream.</p>'}</div>`;
+
+V.budget=()=>{
+ const mt=S.tx.filter(t=>t.date.startsWith(bMonth)).sort((a,b)=>b.date.localeCompare(a.date));
+ const inc=mt.filter(t=>t.type==='in').reduce((a,t)=>a+t.amt,0),out=mt.filter(t=>t.type==='out').reduce((a,t)=>a+t.amt,0);
+ const lim=S.limits[bMonth]||0,pct=lim?Math.min(100,out/lim*100):0;
+ const cats=EXP.map(c=>[c,mt.filter(t=>t.type==='out'&&t.cat===c).reduce((a,t)=>a+t.amt,0)]).filter(c=>c[1]>0).sort((a,b)=>b[1]-a[1]);
+ const mx=cats.length?cats[0][1]:1;
+ return `<div class="head"><div><h1>Budget Tracker</h1><p>Every peso in and out, month by month.</p></div><div style="width:190px"><label for="bM">Month</label><input id="bM" type="month" value="${bMonth}"></div></div>
+ <div class="stats" style="margin-bottom:16px"><div class="stat"><small>Income</small><b class="pos">${peso(inc)}</b></div><div class="stat"><small>Expenses</small><b class="neg">${peso(out)}</b></div><div class="stat"><small>Balance</small><b>${peso(inc-out)}</b></div>
+ <div class="stat"><small>${lim?'Budget: '+peso(lim):'No budget limit yet'}</small><div class="bar" style="margin:12px 0 6px"><i style="width:${pct}%"></i></div><small>${lim?(out>lim?peso(out-lim)+' over budget':peso(lim-out)+' left to spend'):'Set one below'}</small></div></div>
+ <div class="grid">
+  <div class="card stack"><h3>New transaction</h3><form id="fTx" class="stack"><div class="row"><div><label for="tT">Type</label><select id="tT"><option value="out">Expense</option><option value="in">Income</option></select></div><div><label for="tA">Amount (₱)</label><input id="tA" type="number" min="0" step="0.01" inputmode="decimal" required></div></div>
+  <div class="row"><div><label for="tC">Category</label><select id="tC">${opts(EXP)}</select></div><div><label for="tD">Date</label><input id="tD" type="date" value="${TODAY()}" required></div></div><div><label for="tN">Note</label><input id="tN" placeholder="e.g. Grab ride home"></div><button>Save</button></form>
+  <form id="fLim" class="row" style="align-items:end;border-top:1px solid var(--line);padding-top:12px"><div><label for="lA">Budget limit this month</label><input id="lA" type="number" min="0" inputmode="decimal" value="${lim||''}"></div><button class="ghost">Set</button></form></div>
+  <div class="card"><h3>Where the money goes</h3>${cats.length?cats.map(c=>`<div style="margin-bottom:10px"><div class="btns" style="justify-content:space-between"><span>${esc(c[0])}</span><span class="num">${peso(c[1])}</span></div><div class="bar"><i style="width:${c[1]/mx*100}%"></i></div></div>`).join(''):'<p class="empty">No expenses this month yet.</p>'}</div>
+  <div class="card"><h3>Transactions</h3>${mt.length?`<ul class="list">${mt.map(t=>`<li><div><b>${esc(t.cat)}</b>${t.note?` <span class="muted">· ${esc(t.note)}</span>`:''}<div class="muted">${nice(t.date)}</div></div><div style="display:flex;align-items:center;gap:4px"><span class="num ${t.type==='in'?'pos':'neg'}">${t.type==='in'?'+':'−'}${peso(t.amt)}</span><button class="sm del" data-a="txdel" data-id="${t.id}" aria-label="Delete">×</button></div></li>`).join('')}</ul>`:'<p class="empty">No transactions yet.</p>'}</div>
+ </div>`};
+
+V.verse=()=>{
+ const i=((dayIdx()+vOff)%VERSES.length+VERSES.length)%VERSES.length,v=VERSES[i],d=addDays(TODAY(),vOff),isFav=S.fav.includes(i);
+ return `<div class="head"><div><h1>Daily Bible Verse</h1><p>${vOff===0?'Your verse for today':nice(d)}</p></div></div>
+ <div class="grid"><div class="verse" style="min-height:260px"><div class="ref">${esc(v[0])} · King James Version</div><q>${esc(v[1])}</q>
+ <div class="btns"><button class="ghost sm" style="color:inherit;border-color:currentColor" data-a="vprev">Previous</button><button class="ghost sm" style="color:inherit;border-color:currentColor" data-a="vnext">Next</button><button class="sm" style="background:var(--bg);color:var(--ink);border-color:var(--bg)" data-a="vfav" data-id="${i}">${isFav?'Saved':'Save'}</button><button class="ghost sm" style="color:inherit;border-color:currentColor" data-a="vcopy" data-id="${i}">Copy</button></div></div>
+ <div class="card stack"><h3>Reflection</h3><label for="vr">What is this verse saying to you today?</label><textarea id="vr">${esc(S.vnotes[d]||'')}</textarea><button data-a="vnote" data-id="${d}">Save reflection</button></div>
+ <div class="card"><h3>Saved verses</h3>${S.fav.length?`<ul class="list">${S.fav.map(f=>`<li><div><b>${esc(VERSES[f][0])}</b><p class="muted">${esc(VERSES[f][1])}</p></div><button class="sm del" data-a="vunfav" data-id="${f}">×</button></li>`).join('')}</ul>`:'<p class="empty">Tap Save on any verse you want to come back to.</p>'}</div></div>`};
+
+V.journal=()=>{
+ const q=jq.toLowerCase(),list=S.journal.filter(j=>!q||(j.title+' '+j.body).toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date));
+ const e=openJ?S.journal.find(j=>j.id===openJ):null;
+ return `<div class="head"><div><h1>Journal</h1><p>A safe place for your thoughts. It stays on this device only.</p></div></div>
+ <div class="grid"><form id="fJ" class="card stack"><h3>${e?'Edit entry':'New entry'}</h3><div class="row"><div><label for="jD">Date</label><input id="jD" type="date" value="${e?e.date:TODAY()}"></div><div><label for="jM">Feeling</label><select id="jM">${opts(MOODS,e&&e.mood)}</select></div></div>
+ <div><label for="jT">Title</label><input id="jT" value="${esc(e?e.title:'')}"></div><div><label for="jB">Just write</label><textarea id="jB" style="min-height:200px" required>${esc(e?e.body:'')}</textarea></div><div class="btns"><button>${e?'Update':'Save'}</button>${e?'<button type="button" class="ghost" data-a="jcancel">Cancel</button>':''}</div></form>
+ <div class="card"><h3>Entries</h3><label for="jS">Search</label><input id="jS" value="${esc(jq)}" placeholder="Word or title">
+ ${list.length?`<ul class="list" style="margin-top:8px">${list.map(j=>`<li><details style="flex:1"><summary><div><b>${esc(j.title||'Untitled')}</b><div class="muted">${nice(j.date)} · ${esc(j.mood)}</div></div></summary><p style="white-space:pre-wrap;margin-top:8px">${esc(j.body)}</p><div class="btns" style="margin-top:8px"><button class="sm ghost" data-a="jedit" data-id="${j.id}">Edit</button><button class="sm del" data-a="jdel" data-id="${j.id}">Delete</button></div></details></li>`).join('')}</ul>`:`<p class="empty" style="margin-top:12px">${q?'No matches.':'No entries yet. Write your first page.'}</p>`}</div></div>`};
+
+V.letters=()=>{
+ const t=TODAY(),L=[...S.letters].sort((a,b)=>a.open.localeCompare(b.open));
+ return `<div class="head"><div><h1>Letters to Future Me</h1><p>Write to your future self. Each letter stays sealed until the date you choose.</p></div></div>
+ <div class="grid"><form id="fL" class="card stack"><h3>New letter</h3><div><label for="lS">Subject</label><input id="lS" required placeholder="e.g. For me on my 30th birthday"></div><div><label for="lD">Open on</label><input id="lD" type="date" min="${addDays(t,1)}" value="${addDays(t,365)}" required></div><div><label for="lB">Dear future me,</label><textarea id="lB" style="min-height:200px" required></textarea></div><button>Seal the letter</button></form>
+ <div class="stack">${L.length?L.map(l=>{const open=l.open<=t,days=Math.round((parse(l.open)-parse(t))/864e5);return open?`<div class="card stack"><div class="btns" style="justify-content:space-between"><span class="chip g">Opened</span><span class="muted">Written ${nice(l.made)}</span></div><h3>${esc(l.subject)}</h3><p style="white-space:pre-wrap">Dear future me,\n\n${esc(l.body)}</p><button class="sm del" data-a="ldel" data-id="${l.id}">Delete</button></div>`:`<div class="card sealed stack"><div class="btns" style="justify-content:space-between"><span class="chip n">Sealed</span><span class="muted">Written ${nice(l.made)}</span></div><h3>${esc(l.subject)}</h3><p><span class="big">${days}</span> ${days===1?'day':'days'} until you can read it · ${nice(l.open)}</p></div>`}).join(''):'<p class="empty">No letters yet. What would you like to tell yourself a year from now?</p>'}</div></div>`};
+
+V.wellness=()=>{
+ const t=TODAY(),c=S.checkins[t]||{mood:5,anx:5,sleep:'',habits:[],note:''};
+ return `<div class="head"><div><h1>Self-Care Tracker</h1><p>For anxiety and depression: daily check-ins, therapy notes and coping tools. It\u2019s here to support you, not to replace your therapist.</p></div></div>
+ <div class="grid">
+ <form id="fC" class="card stack"><h3>Today\u2019s check-in</h3>
+  <div><label for="cM">Mood: <b id="cMv">${c.mood}</b>/10 <span class="muted">(1 heavy, 10 light)</span></label><input id="cM" type="range" min="1" max="10" value="${c.mood}"></div>
+  <div><label for="cA">Anxiety: <b id="cAv">${c.anx}</b>/10 <span class="muted">(1 calm, 10 overwhelming)</span></label><input id="cA" type="range" min="1" max="10" value="${c.anx}"></div>
+  <div><label for="cS">Hours of sleep last night</label><input id="cS" type="number" min="0" max="24" step="0.5" inputmode="decimal" value="${esc(c.sleep)}"></div>
+  <div class="checks"><label style="color:var(--soft)">What I did for myself today</label>${HABITS.map((h,i)=>`<label><input type="checkbox" id="h${i}"${c.habits.includes(i)?' checked':''}>${h}</label>`).join('')}</div>
+  <div><label for="cN">What triggered you or helped you today?</label><textarea id="cN">${esc(c.note)}</textarea></div><button>Save check-in</button></form>
+ <div class="stack"><div class="card"><h3>Last 14 days</h3><p class="muted"><span style="color:var(--sage)">●</span> Mood &nbsp; <span style="color:var(--rose)">●</span> Anxiety</p><div class="fig" id="mf"><svg id="ms"></svg></div></div>
+ <div class="card stack"><h3>Box breathing</h3><p class="muted">Breathe in for 4, hold for 4, out for 4, hold for 4. Repeat until you feel lighter.</p><div class="breath"><div class="circ" id="circ">Start</div></div><button class="ghost" data-a="breath">Start / stop</button>
+ <details><summary><b>5-4-3-2-1 grounding</b></summary><p style="margin-top:6px">Notice 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell and 1 you can taste. It brings your mind back to the present.</p></details></div></div>
+ <div class="card stack"><h3>Therapy notes</h3><form id="fTh" class="stack"><div class="row"><div><label for="thD">Session date</label><input id="thD" type="date" value="${t}"></div><div><label for="thW">With whom / where</label><input id="thW"></div></div><div><label for="thN">What I learned</label><textarea id="thN" required></textarea></div><div><label for="thH">Homework or next steps</label><input id="thH"></div><button>Save session</button></form>
+ ${S.therapy.length?`<ul class="list">${[...S.therapy].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`<li><div><b>${nice(s.date)}</b>${s.who?` <span class="muted">· ${esc(s.who)}</span>`:''}<p style="white-space:pre-wrap">${esc(s.notes)}</p>${s.hw?`<p class="muted">Homework: ${esc(s.hw)}</p>`:''}</div><button class="sm del" data-a="thdel" data-id="${s.id}">×</button></li>`).join('')}</ul>`:''}</div>
+ <div class="help stack"><h3>If it gets too heavy</h3><p>You don\u2019t have to go through it alone. Call the NCMH Crisis Hotline, free and open 24/7: <b>1553</b> (landline), <b>0919-057-1553</b> (Smart/TNT), <b>0917-899-8727</b> o <b>0966-351-4518</b> (Globe/TM). You can also call Allen or anyone you trust.</p></div>
+ </div>`};
+
+V.gratitude=()=>{
+ const t=TODAY(),g=S.gratitude[t]||['','',''],st=streak(d=>S.gratitude[d]&&S.gratitude[d].some(x=>x));
+ const days=Object.keys(S.gratitude).filter(d=>d!==t&&S.gratitude[d].some(x=>x)).sort().reverse();
+ return `<div class="head"><div><h1>Gratitude Journal</h1><p>Three things you\u2019re thankful for today, no matter how small.</p></div><div class="stat"><small>Streak</small><b>${st} ${st===1?'day':'days'}</b></div></div>
+ <div class="grid"><form id="fG" class="card stack"><h3>${nice(t)}</h3>${[0,1,2].map(i=>`<div><label for="g${i}">${i+1}. Thank you, Lord, for…</label><input id="g${i}" value="${esc(g[i])}"></div>`).join('')}<button>Save</button></form>
+ <div class="card"><h3>Past days</h3>${days.length?`<ul class="list">${days.map(d=>`<li><div><b>${nice(d)}</b><ul style="margin:4px 0 0;padding-left:18px">${S.gratitude[d].filter(x=>x).map(x=>`<li style="display:list-item;border:0;padding:2px 0">${esc(x)}</li>`).join('')}</ul></div></li>`).join('')}</ul>`:'<p class="empty">What you wrote on past days will appear here.</p>'}</div></div>`};
+
+V.walk=()=>{
+ const t=TODAY(),w=S.walks[t]||{steps:'',mins:'',km:''},days=[...Array(7)].map((_,i)=>addDays(t,i-6));
+ const mx=Math.max(S.walkGoal,...days.map(d=>(S.walks[d]||{}).steps||0));
+ const st=streak(d=>S.walks[d]&&S.walks[d].steps>=S.walkGoal),m=t.slice(0,7);
+ const mon=Object.entries(S.walks).filter(([d])=>d.startsWith(m)),tot=mon.reduce((a,[,x])=>a+(x.steps||0),0),km=mon.reduce((a,[,x])=>a+(Number(x.km)||0),0);
+ const tp=Math.min(100,((w.steps||0)/S.walkGoal)*100);
+ return `<div class="head"><div><h1>Walking Tracker</h1><p>One step at a time. Daily goal: ${S.walkGoal.toLocaleString()} steps.</p></div></div>
+ <div class="stats" style="margin-bottom:16px"><div class="stat"><small>Today</small><b>${(w.steps||0).toLocaleString()}</b><div class="bar g" style="margin-top:6px"><i style="width:${tp}%"></i></div></div><div class="stat"><small>Goal streak</small><b>${st} ${st===1?'day':'days'}</b></div><div class="stat"><small>This month</small><b>${tot.toLocaleString()}</b><small>steps</small></div><div class="stat"><small>Distance this month</small><b>${km.toFixed(1)} km</b></div></div>
+ <div class="grid"><form id="fW" class="card stack"><h3>Log a walk</h3><div><label for="wD">Date</label><input id="wD" type="date" value="${t}"></div><div class="row"><div><label for="wS">Steps</label><input id="wS" type="number" min="0" inputmode="numeric" value="${w.steps}"></div><div><label for="wM">Minutes</label><input id="wM" type="number" min="0" inputmode="numeric" value="${w.mins}"></div><div><label for="wK">Km</label><input id="wK" type="number" min="0" step="0.1" inputmode="decimal" value="${w.km}"></div></div><button>Save</button>
+ <div class="row" style="align-items:end;border-top:1px solid var(--line);padding-top:12px"><div><label for="wG">Daily goal (steps)</label><input id="wG" type="number" min="500" step="500" value="${S.walkGoal}"></div><button type="button" class="ghost" data-a="wgoal">Update</button></div></form>
+ <div class="card"><h3>Last 7 days</h3>${days.map(d=>{const s=(S.walks[d]||{}).steps||0;return `<div style="display:grid;grid-template-columns:3.2em minmax(0,1fr) 5.5em;gap:10px;align-items:center;margin:10px 0"><span class="muted">${parse(d).toLocaleDateString('en-PH',{weekday:'short'})}</span><div class="bar${s>=S.walkGoal?' g':''}" style="height:16px"><i style="width:${s/mx*100}%"></i></div><span class="num">${s.toLocaleString()}</span></div>`}).join('')}<p class="muted">Green means you hit your goal.</p></div></div>`};
+
+V.corner=()=>{
+ const vis=S.travel.filter(x=>x.status==='Visited').length;
+ return `<div class="head"><div><h1>Allen &amp; Sheila Corner</h1><p>For what we\u2019re saving for and where we\u2019ll go together.</p></div><div class="stat"><small>Places we\u2019ve been</small><b>${vis} ${vis===1?'place':'places'}</b></div></div>
+ <div class="grid">
+ <div class="stack"><h2>Savings goals</h2>
+  ${S.ipon.map(g=>{const p=g.target?Math.min(100,g.saved/g.target*100):0;return `<div class="card stack"><div class="btns" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">${esc(g.name)}</h3><button class="sm del" data-a="idel" data-id="${g.id}">Delete</button></div><p><span class="big">${peso(g.saved)}</span> <span class="muted">of ${peso(g.target)}${g.by?' · by '+nice(g.by):''}</span></p><div class="bar g"><i style="width:${p}%"></i></div><p class="muted">${Math.round(p)}%${g.saved<g.target?' · '+peso(g.target-g.saved)+' to go':' · Goal reached!'}</p>
+  <div class="row" style="align-items:end"><div><label for="d${g.id}">Add or withdraw</label><input id="d${g.id}" type="number" step="0.01" inputmode="decimal" placeholder="e.g. 500 or -200"></div><button class="ghost" data-a="idep" data-id="${g.id}">Add</button></div></div>`}).join('')||'<p class="empty">No savings goals yet.</p>'}
+  <form id="fI" class="card tint stack"><h3>New savings goal</h3><div><label for="iN">Saving for</label><input id="iN" required placeholder="e.g. Emergency fund, Japan trip"></div><div class="row"><div><label for="iT">Target (₱)</label><input id="iT" type="number" min="1" inputmode="decimal" required></div><div><label for="iB">Target date</label><input id="iB" type="date"></div></div><button>Add goal</button></form></div>
+ <div class="stack"><h2>Travel goals</h2>
+  ${S.travel.length?S.travel.map(x=>`<div class="card stack"><div class="btns" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">${esc(x.place)}</h3><span class="chip${x.status==='Visited'?' g':x.status==='Dream'?' n':''}">${esc(x.status)}</span></div><p class="muted">${x.when?'Target: '+nice(x.when):'No date yet'}${x.cost?' · Budget '+peso(x.cost):''}</p>${x.note?`<p>${esc(x.note)}</p>`:''}<div class="row" style="align-items:end"><div><label for="s${x.id}">Status</label><select id="s${x.id}" data-a="tstat" data-id="${x.id}">${opts(TSTAT,x.status)}</select></div><button class="del" data-a="tdel" data-id="${x.id}">Delete</button></div></div>`).join(''):'<p class="empty">Where do we want to go?</p>'}
+  <form id="fTr" class="card tint stack"><h3>New destination</h3><div><label for="trP">Place</label><input id="trP" required placeholder="e.g. Batanes, Seoul"></div><div class="row"><div><label for="trW">When</label><input id="trW" type="date"></div><div><label for="trC">Estimated budget (₱)</label><input id="trC" type="number" min="0" inputmode="decimal"></div></div><div><label for="trN">What we want to do there</label><input id="trN"></div><button>Add destination</button></form></div>
+ </div>`};
+
+V.backup=()=>`<div class="head"><div><h1>Settings</h1><p>All your data is saved only in this browser on this device. No one else can see it, but it will be lost if the browser data is cleared, so back it up from time to time.</p></div></div>
+ <div class="grid"><form id="fName" class="card stack"><h3>Your name</h3><div><label for="nm">Name</label><input id="nm" value="${esc(S.name)}"></div><button>Save</button><div><label for="thm">Theme</label><select id="thm">${[['auto','Match my phone'],['light','Light'],['dark','Dark']].map(([k,l])=>`<option value="${k}"${S.theme===k?' selected':''}>${l}</option>`).join('')}</select></div></form>
+ <div class="card stack"><h3>Backup</h3><p class="muted">Copy this text and save it in your Notes app or send it to yourself. It includes everything, photos too.</p><textarea id="bk" readonly style="min-height:120px;font-size:13px">${esc(JSON.stringify(S))}</textarea><div class="btns"><button data-a="dlbk">Download backup file</button><button class="ghost" data-a="copybk">Copy backup</button></div></div>
+ <form id="fRes" class="card stack"><h3>Restore</h3><p class="muted">Paste your backup text or choose a file. This replaces your current data.</p><div><label for="rT">Backup text</label><textarea id="rT"></textarea></div><div><label for="rF">Or choose a file</label><input id="rF" type="file" accept=".json,.txt,application/json,text/plain"></div><button>Restore</button></form>
+ <div class="card stack"><h3>Delete everything</h3><p class="muted">Make a backup before doing this.</p><button class="ghost" style="color:var(--rose)" data-a="wipe">Delete all data</button></div></div>`;
+
+V.habits=()=>{
+ const t=TODAY(),days=[...Array(7)].map((_,i)=>addDays(t,i-6)),done=(S.hlog[t]||[]).filter(id=>S.habits.some(h=>h.id===id)).length;
+ return `<div class="head"><div><h1>Habit Tracker</h1><p>Tap a square to mark a habit done for that day.</p></div><div class="stat"><small>Today</small><b>${done}/${S.habits.length}</b></div></div>
+ <div class="card">${S.habits.length?`<div class="hgrid"><span class="hn0"></span>${days.map(d=>`<span class="d"${d===t?' style="color:var(--ink);font-weight:700"':''}>${parse(d).toLocaleDateString('en-PH',{weekday:'narrow'})}<br>${parse(d).getDate()}</span>`).join('')}<span class="d">Streak</span>
+ ${S.habits.map(h=>`<span class="hn" style="display:flex;align-items:center;justify-content:space-between;gap:4px">${esc(h.name)}<button class="sm del" data-a="hdel" data-id="${h.id}" aria-label="Delete habit">×</button></span>${days.map(d=>`<button class="hc${(S.hlog[d]||[]).includes(h.id)?' on':''}" data-a="htog" data-id="${h.id}" data-d="${d}" aria-label="${esc(h.name)} on ${nice(d)}"></button>`).join('')}<span class="num">${streak(d=>(S.hlog[d]||[]).includes(h.id))}</span>`).join('')}</div>`:'<p class="empty">Add your first habit below.</p>'}</div>
+ <form id="fH" class="card tint row" style="align-items:end;margin-top:16px"><div><label for="hN">New habit</label><input id="hN" required placeholder="e.g. Read 10 pages"></div><button>Add habit</button></form>`};
+
+const QUAL=['Restless','Light','Okay','Good','Great'];
+V.sleep=()=>{
+ const t=TODAY(),days=[...Array(7)].map((_,i)=>addDays(t,i-6)),last=S.sleep[t],logged=days.filter(d=>S.sleep[d]);
+ const avg=logged.length?logged.reduce((a,d)=>a+hrs(S.sleep[d].bed,S.sleep[d].wake),0)/logged.length:0;
+ const aq=logged.length?logged.reduce((a,d)=>a+S.sleep[d].q,0)/logged.length:0;
+ const list=Object.keys(S.sleep).sort().reverse().slice(0,14);
+ return `<div class="head"><div><h1>Sleep Log</h1><p>Most adults feel best with 7 to 9 hours. Log the night by the date you woke up.</p></div></div>
+ <div class="stats" style="margin-bottom:16px"><div class="stat"><small>Last night</small><b>${last?hrs(last.bed,last.wake).toFixed(1)+' h':'—'}</b></div><div class="stat"><small>7-day average</small><b>${avg?avg.toFixed(1)+' h':'—'}</b></div><div class="stat"><small>Average quality</small><b>${aq?QUAL[Math.round(aq)-1]:'—'}</b></div></div>
+ <div class="grid"><form id="fSl" class="card stack"><h3>Log a night</h3><div><label for="slD">Woke up on</label><input id="slD" type="date" value="${t}"></div><div class="row"><div><label for="slB">Bedtime</label><input id="slB" type="time" value="${last?last.bed:'23:00'}" required></div><div><label for="slW">Wake time</label><input id="slW" type="time" value="${last?last.wake:'07:00'}" required></div></div><div><label for="slQ">How did you sleep?</label><select id="slQ">${QUAL.map((q,i)=>`<option value="${i+1}"${(last?last.q:3)===i+1?' selected':''}>${q}</option>`).join('')}</select></div><button>Save</button></form>
+ <div class="card"><h3>Last 7 nights</h3>${days.map(d=>{const x=S.sleep[d],h=x?hrs(x.bed,x.wake):0;return `<div style="display:grid;grid-template-columns:3.2em minmax(0,1fr) 3.4em;gap:10px;align-items:center;margin:10px 0"><span class="muted">${parse(d).toLocaleDateString('en-PH',{weekday:'short'})}</span><div class="bar${h>=7&&h<=9?' g':''}" style="height:16px"><i style="width:${Math.min(100,h/10*100)}%"></i></div><span class="num">${x?h.toFixed(1)+' h':'—'}</span></div>`}).join('')}<p class="muted">Green means 7 to 9 hours.</p></div>
+ <div class="card"><h3>History</h3>${list.length?`<ul class="list">${list.map(d=>{const x=S.sleep[d];return `<li><div><b>${nice(d)}</b><div class="muted">${x.bed} to ${x.wake} · ${QUAL[x.q-1]}</div></div><div style="display:flex;align-items:center;gap:4px"><span class="num">${hrs(x.bed,x.wake).toFixed(1)} h</span><button class="sm del" data-a="sldel" data-id="${d}" aria-label="Delete">×</button></div></li>`}).join('')}</ul>`:'<p class="empty">No nights logged yet.</p>'}</div></div>`};
+
+V.cycle=()=>{
+ const c=cycleInfo(),t=TODAY(),list=[...S.periods].sort((a,b)=>b.start.localeCompare(a.start));
+ let ring='',msg='';
+ if(c){const p=Math.min(100,Math.max(0,c.day/c.avg*100)),dn=daysTo(c.next);ring=`<div class="ring" style="background:conic-gradient(var(--rose) 0 ${p}%,var(--paper2) ${p}% 100%)"><div><span class="big">${c.day}</span><span class="muted">day of cycle</span></div></div>`;msg=dn>0?`Next period expected in <b>${dn} ${dn===1?'day':'days'}</b> (${nice(c.next)})`:dn===0?'Next period expected <b>today</b>':`Period is <b>${-dn} ${dn===-1?'day':'days'} later</b> than expected`}
+ return `<div class="head"><div><h1>Cycle Tracker</h1><p>Log when your period starts and ends. Predictions get better the more you log.</p></div></div>
+ <div class="grid"><div class="card stack" style="text-align:center">${c?ring+`<p>${msg}</p><p class="muted">Average cycle ${c.avg} days · average period ${c.plen} days</p>${!c.last.end&&c.day<=10?`<button data-a="cyend" data-id="${c.last.id}">My period ended today</button>`:''}`:'<p class="empty">Log your last period to see predictions.</p>'}<p class="muted" style="font-size:13px">Estimates only. Not reliable for preventing pregnancy.</p></div>
+ <form id="fCy" class="card stack"><h3>Log a period</h3><div class="row"><div><label for="cyS">Start date</label><input id="cyS" type="date" value="${t}" max="${t}" required></div><div><label for="cyE">End date (optional)</label><input id="cyE" type="date" max="${t}"></div></div><button>Save</button></form>
+ <div class="card"><h3>History</h3>${list.length?`<ul class="list">${list.map(p=>`<li><div><b>${nice(p.start)}</b><div class="muted">${p.end?'to '+nice(p.end)+' · '+(daysTo(p.end)-daysTo(p.start)+1)+' days':'Ongoing or end not logged'}</div></div><button class="sm del" data-a="cydel" data-id="${p.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:'<p class="empty">No periods logged yet.</p>'}</div></div>`};
+
+const itemBody=x=>`${x.img?`<img src="${esc(x.img)}" alt="" style="display:block;max-width:100%;border-radius:14px">`:''}${x.text?`<p style="white-space:pre-wrap">${esc(x.text)}</p>`:''}${safeUrl(x.link)?`<a href="${esc(safeUrl(x.link))}" target="_blank" rel="noopener">Open link</a>`:''}${x.from?`<p class="muted">From ${esc(x.from)}</p>`:''}`;
+V.comfort=()=>{
+ const p=S.comfort.find(x=>x.id===cPick);
+ return `<div class="head"><div><h1>Comfort Box</h1><p>Sweet messages, photos, songs and verses to open on heavy days.</p></div></div>
+ <div class="grid"><div class="jar">${p?`<span class="chip" style="align-self:flex-start">${esc(p.kind)}</span>${p.img?`<img src="${esc(p.img)}" alt="" style="max-width:100%;border-radius:14px">`:''}${p.text?`<p class="big2">${esc(p.text)}</p>`:''}${safeUrl(p.link)?`<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener" style="color:inherit">Open link</a>`:''}${p.from?`<p style="opacity:.8">From ${esc(p.from)}</p>`:''}`:`<p class="big2">${S.comfort.length?'Need a little comfort right now?':'Your comfort box is empty for now.'}</p>`}<button style="align-self:flex-start;background:var(--bg);color:var(--ink);border-color:var(--bg)" data-a="cpick"${S.comfort.length?'':' disabled'}>${p?'Open another':'Open the comfort box'}</button></div>
+ <form id="fCo" class="card stack"><h3>Add to the box</h3><div class="row"><div><label for="coK">Type</label><select id="coK">${opts(CKIND)}</select></div><div><label for="coF">From</label><input id="coF" placeholder="e.g. Allen"></div></div><div><label for="coT">Message</label><textarea id="coT" placeholder="e.g. You are so loved. One day at a time, okay?"></textarea></div><div><label for="coI">Photo (optional)</label><input id="coI" type="file" accept="image/*"></div><div><label for="coL">Song or link (optional)</label><input id="coL" type="url" placeholder="https://"></div><button>Add</button></form></div>
+ <h2 style="margin:28px 0 12px">Everything in the box</h2>${S.comfort.length?`<div class="board">${S.comfort.map(x=>`<div class="vc"><div class="in stack"><div class="btns" style="justify-content:space-between;align-items:center"><span class="chip">${esc(x.kind)}</span><button class="sm del" data-a="codel" data-id="${x.id}">Delete</button></div>${itemBody(x)}</div></div>`).join('')}</div>`:'<p class="empty">Add screenshots of sweet messages, favorite photos or songs. Ask Allen to send some too.</p>'}`};
+
+V.prayer=()=>{
+ const pr=S.prayers.filter(x=>x.status!=='Answered').sort((a,b)=>b.date.localeCompare(a.date)),an=S.prayers.filter(x=>x.status==='Answered').sort((a,b)=>(b.ans||'').localeCompare(a.ans||''));
+ return `<div class="head"><div><h1>Prayer Journal</h1><p>Write your prayers down, and look back at how God answered.</p></div><div class="stats" style="min-width:260px"><div class="stat"><small>Praying</small><b>${pr.length}</b></div><div class="stat"><small>Answered</small><b class="pos">${an.length}</b></div></div></div>
+ <div class="grid"><form id="fPr" class="card stack"><h3>New prayer</h3><div><label for="prT">Prayer request</label><textarea id="prT" required></textarea></div><div class="row"><div><label for="prW">For</label><input id="prW" placeholder="e.g. Myself, Mama, Allen"></div><div><label for="prD">Date</label><input id="prD" type="date" value="${TODAY()}"></div></div><button>Save prayer</button></form>
+ <div class="stack"><h3>Still praying</h3>${pr.length?pr.map(x=>`<div class="card stack"><p style="white-space:pre-wrap">${esc(x.text)}</p><p class="muted">${x.who?'For '+esc(x.who)+' · ':''}Since ${nice(x.date)}</p><div class="row" style="align-items:end"><div><label for="pa${x.id}">How was it answered?</label><input id="pa${x.id}"></div><button class="ghost" data-a="pans" data-id="${x.id}">Answered!</button></div><button class="sm del" style="align-self:flex-start" data-a="pdel" data-id="${x.id}">Delete</button></div>`).join(''):'<p class="empty">No open prayer requests.</p>'}</div>
+ <div class="card"><h3>Answered prayers</h3>${an.length?`<ul class="list">${an.map(x=>`<li><div><b style="white-space:pre-wrap">${esc(x.text)}</b>${x.answer?`<p>${esc(x.answer)}</p>`:''}<p class="muted">Prayed ${nice(x.date)} · answered ${nice(x.ans)}</p></div><button class="sm del" data-a="pdel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:'<p class="empty">Answered prayers will be kept here as reminders of His faithfulness.</p>'}</div></div>`};
+
+V.reading=()=>{
+ const k=S.reading.plan,ch=chapters(k),done=S.reading.done[k]||[],nx=ch.findIndex((_,i)=>!done.includes(i)),p=done.length/ch.length*100;
+ let i0=0;
+ return `<div class="head"><div><h1>Bible Reading Plan</h1><p>One chapter at a time.</p></div><div style="width:240px"><label for="rPlan">Plan</label><select id="rPlan">${Object.entries(PLANS).map(([key,v])=>`<option value="${key}"${key===k?' selected':''}>${v[0]}</option>`).join('')}</select></div></div>
+ <div class="grid"><div class="verse" style="min-height:220px"><div class="ref">${esc(PLANS[k][0])} · ${done.length} of ${ch.length} chapters</div><q>${nx<0?'Plan complete. Well done!':'Next: '+esc(ch[nx])}</q><div class="bar" style="background:transparent;border-color:currentColor"><i style="width:${p}%;background:var(--bg)"></i></div>${nx<0?'':`<button style="align-self:flex-start;background:var(--bg);color:var(--ink);border-color:var(--bg)" data-a="rnext" data-id="${nx}">Mark ${esc(ch[nx])} as read</button>`}</div>
+ <div class="card"><h3>All chapters</h3><p class="muted">Tap a chapter to mark it read or unread.</p>${PLANS[k][1].map(([b,n])=>{const s=i0;i0+=n;const c=[...Array(n)].filter((_,j)=>done.includes(s+j)).length;return `<details${nx>=s&&nx<s+n?' open':''}><summary><b>${b}</b>&nbsp;<span class="muted">${c}/${n}</span></summary><div class="chap">${[...Array(n)].map((_,j)=>`<button class="${done.includes(s+j)?'on':''}" data-a="rtog" data-id="${s+j}">${j+1}</button>`).join('')}</div></details>`}).join('')}</div></div>`};
+
+V.bills=()=>{
+ const m=TODAY().slice(0,7),L=[...S.bills].sort((a,b)=>a.due-b.due),tot=L.reduce((a,b)=>a+b.amt,0),un=L.filter(b=>!b.paid[m]);
+ return `<div class="head"><div><h1>Bills</h1><p>Monthly bills and when they're due. Marking one paid also adds it to your Budget.</p></div></div>
+ <div class="stats" style="margin-bottom:16px"><div class="stat"><small>Monthly bills</small><b>${peso(tot)}</b></div><div class="stat"><small>Still unpaid this month</small><b class="neg">${peso(un.reduce((a,b)=>a+b.amt,0))}</b><small>${un.length} ${un.length===1?'bill':'bills'}</small></div></div>
+ <div class="grid"><div class="card"><h3>${new Date().toLocaleDateString('en-PH',{month:'long'})}</h3>${L.length?`<ul class="list">${L.map(b=>{const dd=billDate(b,m),n=daysTo(dd),paid=!!b.paid[m];return `<li><div><b>${esc(b.name)}</b><div class="muted">Due ${nice(dd)} · ${paid?'<span class="pos">Paid</span>':n>0?'in '+n+(n===1?' day':' days'):n===0?'<span class="neg">due today</span>':'<span class="neg">'+(-n)+(n===-1?' day':' days')+' overdue</span>'}</div></div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="num">${peso(b.amt)}</span><button class="sm ${paid?'ghost':''}" data-a="bpay" data-id="${b.id}">${paid?'Undo':'Paid'}</button><button class="sm del" data-a="bdel" data-id="${b.id}" aria-label="Delete">×</button></div></li>`}).join('')}</ul>`:'<p class="empty">No bills yet. Add rent, electricity, internet and others.</p>'}</div>
+ <form id="fBi" class="card stack"><h3>Add a bill</h3><div><label for="biN">Bill</label><input id="biN" required placeholder="e.g. Meralco, PLDT, rent"></div><div class="row"><div><label for="biA">Amount (₱)</label><input id="biA" type="number" min="0" step="0.01" inputmode="decimal" required></div><div><label for="biD">Due every month on day</label><input id="biD" type="number" min="1" max="31" inputmode="numeric" required></div></div><button>Add bill</button></form></div>`};
+
+V.wishlist=()=>{
+ const L=[...S.wish].sort((a,b)=>a.bought-b.bought),open=L.filter(w=>!w.bought);
+ return `<div class="head"><div><h1>Wishlist</h1><p>Save up first, then buy. No impulse buys.</p></div><div class="stat"><small>Total wishlist</small><b>${peso(open.reduce((a,w)=>a+w.price,0))}</b></div></div>
+ <div class="grid">${L.map(w=>{const p=w.price?Math.min(100,w.saved/w.price*100):0;return `<div class="card stack${w.bought?' tint':''}"><div class="btns" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">${esc(w.item)}</h3>${w.bought?'<span class="chip g">Bought</span>':''}</div><p><span class="big">${peso(w.saved)}</span> <span class="muted">of ${peso(w.price)}</span></p><div class="bar g"><i style="width:${p}%"></i></div>${safeUrl(w.link)?`<a href="${esc(safeUrl(w.link))}" target="_blank" rel="noopener">View item</a>`:''}
+ ${w.bought?'':`<div class="row" style="align-items:end"><div><label for="w${w.id}">Add savings</label><input id="w${w.id}" type="number" step="0.01" inputmode="decimal" placeholder="e.g. 200"></div><button class="ghost" data-a="wdep" data-id="${w.id}">Add</button></div>`}<div class="btns"><button class="sm${w.bought?' ghost':''}" data-a="wbuy" data-id="${w.id}">${w.bought?'Undo':'Bought it!'}</button><button class="sm del" data-a="wdel" data-id="${w.id}">Delete</button></div></div>`}).join('')}
+ <form id="fWi" class="card tint stack"><h3>Add to wishlist</h3><div><label for="wiN">Item</label><input id="wiN" required placeholder="e.g. New shoes"></div><div class="row"><div><label for="wiP">Price (₱)</label><input id="wiP" type="number" min="0" step="0.01" inputmode="decimal" required></div><div><label for="wiL">Link (optional)</label><input id="wiL" type="url" placeholder="https://"></div></div><button>Add</button></form></div>`};
+
+V.dates=()=>{
+ const p=S.dateIdeas.find(x=>x.id===dPick),todo=S.dateIdeas.filter(x=>!x.done),dn=S.dateIdeas.filter(x=>x.done);
+ return `<div class="head"><div><h1>Date Jar</h1><p>Can't decide what to do? Let the jar choose.</p></div><div class="stat"><small>Dates done</small><b>${dn.length}</b></div></div>
+ <div class="grid"><div class="jar"><p class="big2">${p?esc(p.text):todo.length?'What should we do next?':'Add more ideas to the jar.'}</p><div class="btns"><button style="background:var(--bg);color:var(--ink);border-color:var(--bg)" data-a="dpick"${todo.length?'':' disabled'}>${p?'Pick another':'Pick a random date'}</button>${p?`<button class="ghost" style="color:inherit;border-color:currentColor" data-a="ddone" data-id="${p.id}">We did it!</button>`:''}</div></div>
+ <form id="fDi" class="card stack"><h3>Add a date idea</h3><div><label for="diT">Idea</label><input id="diT" required placeholder="e.g. Try the new ramen place"></div><button>Add to jar</button><p class="muted">The first ten ideas are starters. Delete any you don't like.</p></form>
+ <div class="card"><h3>In the jar (${todo.length})</h3>${todo.length?`<ul class="list">${todo.map(x=>`<li><span>${esc(x.text)}</span><span style="display:flex"><button class="sm ghost" data-a="ddone" data-id="${x.id}">Done</button><button class="sm del" data-a="ddel" data-id="${x.id}" aria-label="Delete">×</button></span></li>`).join('')}</ul>`:'<p class="empty">The jar is empty.</p>'}
+ ${dn.length?`<h3 style="margin-top:16px">Done</h3><ul class="list">${dn.map(x=>`<li><span class="muted">${esc(x.text)}${x.on?' · '+nice(x.on):''}</span><button class="sm del" data-a="ddel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:''}</div></div>`};
+
+V.important=()=>{
+ const L=S.dates.map(x=>({...x,n:nextOcc(x.date,x.yearly)})).sort((a,b)=>(a.n<TODAY())-(b.n<TODAY())||a.n.localeCompare(b.n));
+ return `<div class="head"><div><h1>Special Dates</h1><p>Anniversaries, birthdays and days worth counting down to.</p></div></div>
+ <div class="grid"><div class="stack">${L.length?L.map(x=>{const d=daysTo(x.n),yrs=x.yearly?(+x.n.slice(0,4))-(+x.date.slice(0,4)):0;return `<div class="card cd"><span class="big">${d===0?'0':Math.abs(d)}</span><div style="flex:1"><b>${esc(x.title)}</b><div class="muted">${d===0?'Today!':d>0?(d===1?'day to go':'days to go'):(d===-1?'day ago':'days ago')} · ${nice(x.n)}${yrs>0?' · '+yrs+(yrs===1?' year':' years'):''}</div>${x.yearly?'<span class="chip n">Every year</span>':''}</div><button class="sm del" data-a="imdel" data-id="${x.id}" aria-label="Delete">×</button></div>`}).join(''):'<p class="empty">Start with your anniversary and birthdays.</p>'}</div>
+ <form id="fIm" class="card stack"><h3>Add a date</h3><div><label for="imT">What</label><input id="imT" required placeholder="e.g. Our anniversary"></div><div><label for="imD">Date</label><input id="imD" type="date" required></div><label style="display:flex;align-items:center;gap:10px;color:var(--ink)"><input type="checkbox" id="imY" checked>Repeats every year</label><button>Add</button></form></div>`};
+
+V.memories=()=>{
+ const L=[...S.memories].sort((a,b)=>b.date.localeCompare(a.date));
+ return `<div class="head"><div><h1>Our Memories</h1><p>The story of Allen and ${esc(S.name)}, one moment at a time.</p></div><div class="stat"><small>Memories</small><b>${L.length}</b></div></div>
+ <div class="grid"><form id="fMe" class="card stack"><h3>Add a memory</h3><div class="row"><div><label for="meD">Date</label><input id="meD" type="date" value="${TODAY()}" required></div><div><label for="meT">Title</label><input id="meT" required placeholder="e.g. Our first date"></div></div><div><label for="meS">The story</label><textarea id="meS"></textarea></div><div><label for="meI">Photo (optional)</label><input id="meI" type="file" accept="image/*"></div><button>Save memory</button></form>
+ <div class="card">${L.length?`<ul class="tl">${L.map(x=>`<li><div class="muted">${nice(x.date)}</div><h3 style="margin:2px 0 4px">${esc(x.title)}</h3>${x.story?`<p style="white-space:pre-wrap">${esc(x.story)}</p>`:''}${x.img?`<img src="${esc(x.img)}" alt="">`:''}<button class="sm del" data-a="medel" data-id="${x.id}">Delete</button></li>`).join('')}</ul>`:'<p class="empty">Your timeline will grow here.</p>'}</div></div>`};
+
+V.planner=()=>{
+ const L=S.tasks.filter(x=>x.date===pDate).sort((a,b)=>a.done-b.done||(b.pri==='Important')-(a.pri==='Important')),dn=L.filter(x=>x.done).length;
+ const old=S.tasks.filter(x=>!x.done&&x.date<TODAY()).length,isT=pDate===TODAY();
+ return `<div class="head"><div><h1>Daily Planner</h1><p>${isT?'Today':nice(pDate)} · ${dn} of ${L.length} done</p></div><div class="btns" style="align-items:end"><button class="ghost sm" data-a="pprev" aria-label="Previous day">‹</button><div style="width:170px"><label for="pD">Day</label><input id="pD" type="date" value="${pDate}"></div><button class="ghost sm" data-a="pnext" aria-label="Next day">›</button></div></div>
+ ${isT&&old?`<div class="warn btns" style="justify-content:space-between;align-items:center"><span>${old} unfinished ${old===1?'task':'tasks'} from earlier days.</span><button class="sm" data-a="tmove">Move to today</button></div>`:''}
+ <div class="grid"><div class="card"><div class="bar g" style="margin-bottom:12px"><i style="width:${L.length?dn/L.length*100:0}%"></i></div>${L.length?`<ul class="list">${L.map(x=>`<li class="task${x.done?' done':''}"><label class="task" style="margin:0;color:var(--ink);flex:1;font-size:16px"><input type="checkbox" data-a="ttog" data-id="${x.id}"${x.done?' checked':''}><span>${esc(x.text)}</span></label>${x.pri==='Important'?'<span class="chip">Important</span>':''}<button class="sm del" data-a="tdel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>${dn?'<button class="ghost sm" data-a="tclear" style="margin-top:8px">Clear finished</button>':''}`:'<p class="empty">Nothing planned yet. Add your first task.</p>'}</div>
+ <form id="fTa" class="card stack"><h3>Add a task</h3><div><label for="taT">Task</label><input id="taT" required placeholder="e.g. Buy groceries"></div><div><label for="taP">Priority</label><select id="taP">${opts(PRI)}</select></div><button>Add</button></form></div>`};
+
+function drawMood(){
+ const s=$('#ms');if(!s)return;
+ const W=s.clientWidth,H=s.clientHeight,L=28,R=10,T=12,B=26,days=[...Array(14)].map((_,i)=>addDays(TODAY(),i-13));
+ const x=i=>L+i*(W-L-R)/13,y=v=>T+(10-v)*(H-T-B)/9;
+ const line=(k,col)=>{let p='',dots='';days.forEach((d,i)=>{const c=S.checkins[d];if(c){p+=(p?'L':'M')+x(i).toFixed(1)+' '+y(c[k]).toFixed(1);dots+=`<circle cx="${x(i)}" cy="${y(c[k])}" r="4" fill="${col}"/>`}});return `<path d="${p}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>${dots}`};
+ let g=[1,5,10].map(v=>`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${v}</text>`).join('');
+ const step=W<520?3:2;
+ g+=days.map((d,i)=>i%step===(13%step)?`<text x="${x(i)}" y="${H-6}" text-anchor="middle">${parse(d).getDate()}</text>`:'').join('');
+ const any=days.some(d=>S.checkins[d]);
+ s.innerHTML=g+(any?line('mood','var(--sage)')+line('anx','var(--rose)'):`<text x="${W/2}" y="${H/2}" text-anchor="middle">Your check-ins will show up here</text>`);
+}
+
+const baseTheme=document.documentElement.getAttribute('data-theme');
+function isDark(){return S.theme==='dark'||(S.theme==='auto'&&(baseTheme==='dark'||(!baseTheme&&matchMedia('(prefers-color-scheme: dark)').matches)))}
+function applyTheme(){const R=document.documentElement;if(S.theme==='auto'){baseTheme?R.setAttribute('data-theme',baseTheme):R.removeAttribute('data-theme')}else R.setAttribute('data-theme',S.theme);$('#themeBtn').textContent=isDark()?'Light mode':'Dark mode'}
+function render(){
+ let r=location.hash.slice(1);if(!V[r])r='home';
+ applyTheme();
+ const cg=GROUPS.find(g=>g[1].includes(r));
+ $('#nav').innerHTML=GROUPS.map(g=>`<a href="#${g[1][0]}" class="${g===cg?'on':''}">${esc(g[0])}</a>`).join('');
+ const sb=$('#sub');sb.style.display=cg[1].length>1?'':'none';sb.innerHTML=cg[1].length>1?cg[1].map(k=>`<a href="#${k}" class="${k===r?'on':''}">${NAMES[k]}</a>`).join(''):'';
+ $('#appName').textContent=S.name+"'s Space";
+ $('#todayLbl').textContent=new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric'});
+ $('#view').innerHTML=(storeOK?'':'<div class="warn">This browser can\u2019t save data, so everything will be lost when you close it. Try opening the app in another browser.</div>')+V[r]();
+ for(const on of document.querySelectorAll('nav .on'))on.scrollIntoView({block:'nearest',inline:'center'});
+ if(ro){ro.disconnect();ro=null}
+ if(r==='wellness'){ro=new ResizeObserver(drawMood);ro.observe($('#ms'));
+  const m=$('#cM'),a=$('#cA');m.oninput=()=>$('#cMv').textContent=m.value;a.oninput=()=>$('#cAv').textContent=a.value}
+}
+function go(){save();render()}
+
+function shrink(file,cb){const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,700/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.72))};im.onerror=()=>toast('Couldn\u2019t read that photo.');im.src=rd.result};rd.readAsDataURL(file)}
+
+document.addEventListener('submit',e=>{
+ e.preventDefault();const id=e.target.id;
+ if(id==='fVision'){const f=$('#vI').files[0],add=img=>{S.vision.unshift({id:uid(),title:val('vT'),cat:val('vC'),note:val('vN'),img,done:false});if(!save()){S.vision.shift()}render()};f?shrink(f,add):add('')}
+ if(id==='fTx'){const a=Number(val('tA'));if(!(a>0))return toast('Enter an amount.');S.tx.push({id:uid(),type:val('tT'),amt:a,cat:val('tC'),date:val('tD')||TODAY(),note:val('tN')});bMonth=(val('tD')||TODAY()).slice(0,7);go();toast('Saved!')}
+ if(id==='fLim'){S.limits[bMonth]=Number(val('lA'))||0;go()}
+ if(id==='fJ'){const o={date:val('jD')||TODAY(),mood:val('jM'),title:val('jT'),body:$('#jB').value};if(openJ){Object.assign(S.journal.find(j=>j.id===openJ),o);openJ=null}else S.journal.push({id:uid(),...o});go();toast('Journal entry saved.')}
+ if(id==='fL'){S.letters.push({id:uid(),subject:val('lS'),open:val('lD'),body:$('#lB').value,made:TODAY()});go();toast('Sealed. See you in the future!')}
+ if(id==='fC'){S.checkins[TODAY()]={mood:+$('#cM').value,anx:+$('#cA').value,sleep:val('cS'),habits:HABITS.map((_,i)=>i).filter(i=>$('#h'+i).checked),note:$('#cN').value};go();toast('Thank you for checking in with yourself.')}
+ if(id==='fTh'){S.therapy.push({id:uid(),date:val('thD')||TODAY(),who:val('thW'),notes:$('#thN').value,hw:val('thH')});go()}
+ if(id==='fG'){S.gratitude[TODAY()]=[0,1,2].map(i=>val('g'+i));go();toast('Thank you, Lord!')}
+ if(id==='fW'){const d=val('wD')||TODAY(),s=Number(val('wS'))||0;if(!s&&!val('wM'))delete S.walks[d];else S.walks[d]={steps:s,mins:val('wM'),km:val('wK')};go()}
+ if(id==='fI'){S.ipon.push({id:uid(),name:val('iN'),target:Number(val('iT'))||0,by:val('iB'),saved:0});go()}
+ if(id==='fTr'){S.travel.push({id:uid(),place:val('trP'),when:val('trW'),cost:Number(val('trC'))||0,note:val('trN'),status:'Dream'});go()}
+ if(id==='fH'){S.habits.push({id:uid(),name:val('hN')});go()}
+ if(id==='fSl'){S.sleep[val('slD')||TODAY()]={bed:val('slB'),wake:val('slW'),q:+val('slQ')};go();toast('Sleep logged.')}
+ if(id==='fCy'){const st=val('cyS'),en=val('cyE');if(en&&en<st)return toast('End date is before the start date.');S.periods.push({id:uid(),start:st,end:en});go()}
+ if(id==='fCo'){const f=$('#coI').files[0],o={kind:val('coK'),from:val('coF'),text:$('#coT').value.trim(),link:val('coL')};if(!f&&!o.text&&!o.link)return toast('Add a message, photo or link.');const add=img=>{S.comfort.unshift({id:uid(),...o,img});if(!save())S.comfort.shift();render();toast('Added to your comfort box.')};f?shrink(f,add):add('')}
+ if(id==='fPr'){S.prayers.push({id:uid(),text:$('#prT').value.trim(),who:val('prW'),date:val('prD')||TODAY(),status:'Praying'});go();toast('Prayer saved. Amen.')}
+ if(id==='fBi'){const d=Math.min(31,Math.max(1,parseInt(val('biD'))||1));S.bills.push({id:uid(),name:val('biN'),amt:Number(val('biA'))||0,due:d,paid:{}});go()}
+ if(id==='fWi'){S.wish.push({id:uid(),item:val('wiN'),price:Number(val('wiP'))||0,link:val('wiL'),saved:0,bought:false});go()}
+ if(id==='fDi'){S.dateIdeas.push({id:uid(),text:val('diT'),done:false});go()}
+ if(id==='fIm'){S.dates.push({id:uid(),title:val('imT'),date:val('imD'),yearly:$('#imY').checked});go()}
+ if(id==='fMe'){const f=$('#meI').files[0],o={date:val('meD')||TODAY(),title:val('meT'),story:$('#meS').value.trim()},add=img=>{S.memories.push({id:uid(),...o,img});if(!save())S.memories.pop();render();toast('Memory saved.')};f?shrink(f,add):add('')}
+ if(id==='fTa'){S.tasks.push({id:uid(),date:pDate,text:val('taT'),pri:val('taP'),done:false});go()}
+ if(id==='fName'){S.name=val('nm')||'Sheila';go();toast('Name updated.')}
+ if(id==='fRes'){const f=$('#rF').files[0],apply=txt=>{try{const d=JSON.parse(txt);if(typeof d!=='object'||!d)throw 0;S=Object.assign(DEF(),d);if(!S.reading||!S.reading.done)S.reading={plan:'gospels',done:{}};go();toast('Data restored!')}catch(x){toast('That backup isn\u2019t valid.')}};if(f){const rd=new FileReader();rd.onload=()=>apply(rd.result);rd.readAsText(f)}else if(val('rT'))apply(val('rT'));else toast('No backup provided.')}
+});
+
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-a]');if(!b||b.tagName==='SELECT')return;const a=b.dataset.a,id=b.dataset.id;
+ const rm=(k,msg)=>ask(msg,()=>{S[k]=S[k].filter(x=>x.id!==id);go()});
+ if(a==='vdone'){const x=S.vision.find(v=>v.id===id);x.done=!x.done;go()}
+ if(a==='vdel')rm('vision','Delete this dream from your board?');
+ if(a==='txdel')rm('tx','Delete this transaction?');
+ if(a==='vprev'){vOff--;render()}
+ if(a==='vnext'){vOff++;render()}
+ if(a==='vfav'){const i=+id;S.fav=S.fav.includes(i)?S.fav.filter(f=>f!==i):[...S.fav,i];go()}
+ if(a==='vunfav'){S.fav=S.fav.filter(f=>f!==+id);go()}
+ if(a==='vcopy'){const v=VERSES[+id];navigator.clipboard.writeText(`"${v[1]}" — ${v[0]} (KJV)`).then(()=>toast('Copied!'),()=>toast('Copying isn\u2019t available here.'))}
+ if(a==='vnote'){const t=$('#vr').value;if(t.trim())S.vnotes[id]=t;else delete S.vnotes[id];go();toast('Reflection saved.')}
+ if(a==='jedit'){openJ=id;render();scrollTo({top:0,behavior:'smooth'})}
+ if(a==='jcancel'){openJ=null;render()}
+ if(a==='jdel')rm('journal','Delete this journal entry? This can\u2019t be undone.');
+ if(a==='ldel')rm('letters','Delete this letter?');
+ if(a==='thdel')rm('therapy','Delete this therapy note?');
+ if(a==='breath'){const c=$('#circ'),on=c.classList.toggle('go');c.textContent=on?'Breathe…':'Start'}
+ if(a==='wgoal'){const g=Number(val('wG'));if(g>0){S.walkGoal=g;go()}}
+ if(a==='idep'){const n=Number(val('d'+id));if(!n)return toast('Enter an amount.');const g=S.ipon.find(x=>x.id===id);g.saved=Math.max(0,Math.round((g.saved+n)*100)/100);go();toast(n>0?'Yay, more savings!':'Updated.')}
+ if(a==='idel')rm('ipon','Delete this savings goal?');
+ if(a==='tdel')rm('travel','Delete this destination?');
+ if(a==='dlbk'){const bl=new Blob([JSON.stringify(S)],{type:'application/json'}),u=URL.createObjectURL(bl),l=document.createElement('a');l.href=u;l.download='sheila-space-backup-'+TODAY()+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);S.lastBackup=TODAY();save();toast('Backup downloaded.')}
+ if(a==='copybk'){navigator.clipboard.writeText(JSON.stringify(S)).then(()=>toast('Backup copied!'),()=>{$('#bk').select();toast('Select all and copy it manually.')})}
+ if(a==='hdel')ask('Delete this habit?',()=>{S.habits=S.habits.filter(h=>h.id!==id);go()});
+ if(a==='htog'){const d=b.dataset.d,l=S.hlog[d]||[];S.hlog[d]=l.includes(id)?l.filter(x=>x!==id):[...l,id];go()}
+ if(a==='sldel')ask('Delete this night?',()=>{delete S.sleep[id];go()});
+ if(a==='cyend'){const p=S.periods.find(x=>x.id===id);p.end=TODAY();go()}
+ if(a==='cydel')rm('periods','Delete this period log?');
+ if(a==='cpick'){const o=S.comfort.filter(x=>x.id!==cPick),l=o.length?o:S.comfort;cPick=l[Math.floor(Math.random()*l.length)].id;render()}
+ if(a==='codel')rm('comfort','Remove this from your comfort box?');
+ if(a==='pans'){const x=S.prayers.find(p=>p.id===id);x.status='Answered';x.answer=val('pa'+id);x.ans=TODAY();go();toast('Praise God!')}
+ if(a==='pdel')rm('prayers','Delete this prayer?');
+ if(a==='rnext'||a==='rtog'){const k=S.reading.plan,l=S.reading.done[k]||[],i=+id;S.reading.done[k]=l.includes(i)?l.filter(x=>x!==i):[...l,i];go()}
+ if(a==='bpay'){const x=S.bills.find(v=>v.id===id),m=TODAY().slice(0,7);if(x.paid[m]){S.tx=S.tx.filter(t=>t.id!==x.paid[m]);delete x.paid[m]}else{const tid=uid();S.tx.push({id:tid,type:'out',amt:x.amt,cat:'Bills',date:TODAY(),note:x.name});x.paid[m]=tid;toast('Paid and added to Budget.')}go()}
+ if(a==='bdel')rm('bills','Delete this bill?');
+ if(a==='wdep'){const n=Number(val('w'+id));if(!n)return toast('Enter an amount.');const w=S.wish.find(x=>x.id===id);w.saved=Math.max(0,Math.round((w.saved+n)*100)/100);go()}
+ if(a==='wbuy'){const w=S.wish.find(x=>x.id===id);w.bought=!w.bought;go();if(w.bought)toast('Enjoy it!')}
+ if(a==='wdel')rm('wish','Delete this wishlist item?');
+ if(a==='dpick'){const l=S.dateIdeas.filter(x=>!x.done&&x.id!==dPick),pool=l.length?l:S.dateIdeas.filter(x=>!x.done);if(pool.length){dPick=pool[Math.floor(Math.random()*pool.length)].id;render()}}
+ if(a==='ddone'){const x=S.dateIdeas.find(v=>v.id===id);x.done=true;x.on=TODAY();if(dPick===id)dPick=null;go();toast('Another memory made!')}
+ if(a==='ddel')rm('dateIdeas','Delete this date idea?');
+ if(a==='imdel')rm('dates','Delete this date?');
+ if(a==='medel')rm('memories','Delete this memory?');
+ if(a==='ttog'){const x=S.tasks.find(v=>v.id===id);x.done=!x.done;go()}
+ if(a==='tdel'){S.tasks=S.tasks.filter(x=>x.id!==id);go()}
+ if(a==='tclear'){S.tasks=S.tasks.filter(x=>!(x.done&&x.date===pDate));go()}
+ if(a==='tmove'){S.tasks.forEach(x=>{if(!x.done&&x.date<TODAY())x.date=TODAY()});go()}
+ if(a==='pprev'){pDate=addDays(pDate,-1);render()}
+ if(a==='pnext'){pDate=addDays(pDate,1);render()}
+ if(a==='wipe')ask('This deletes ALL your data on this device. Are you sure?',()=>{S=DEF();go()});
+});
+
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.id==='bM'&&t.value){bMonth=t.value;render()}
+ if(t.id==='rPlan'){S.reading.plan=t.value;go()}
+ if(t.id==='pD'&&t.value){pDate=t.value;render()}
+ if(t.id==='thm'){S.theme=t.value;go()}
+ if(t.id==='tT'){$('#tC').innerHTML=opts(t.value==='in'?INC:EXP)}
+ if(t.dataset.a==='tstat'){const x=S.travel.find(v=>v.id===t.dataset.id);x.status=t.value;go()}
+});
+document.addEventListener('input',e=>{if(e.target.id==='jS'){jq=e.target.value;const p=e.target.selectionStart;render();const s=$('#jS');s.focus();s.setSelectionRange(p,p)}});
+$('#themeBtn').onclick=()=>{S.theme=isDark()?'light':'dark';go()};
+addEventListener('hashchange',()=>{vOff=0;openJ=null;cPick=null;dPick=null;render();scrollTo(0,0)});
+render();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+}
+</script>
+</body>
+</html>

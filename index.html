@@ -166,16 +166,30 @@ nav.sub a.on{background:var(--roseBg);color:var(--ink);border-color:var(--rose)}
 @media(max-width:520px){.hgrid{grid-template-columns:repeat(7,minmax(0,1fr)) 2.6em;gap:5px}.hgrid .hn{grid-column:1/-1;margin-top:6px}.hgrid .hn0{display:none}}
 .ring{display:grid;place-items:center;width:150px;height:150px;border-radius:50%;margin:0 auto}
 .ring div{width:118px;height:118px;border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;line-height:1.1}
+#auth{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.authbox{width:100%;max-width:420px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:clamp(22px,5vw,34px);display:flex;flex-direction:column;gap:14px}
+.authbox .logo{width:54px;height:54px;border-radius:50%;background:var(--ink);color:var(--roseBg);display:grid;place-items:center;font-family:"Instrument Serif",Georgia,serif;font-size:32px}
+.authbox h1{font-size:36px}
+.chk{display:flex!important;align-items:center;gap:10px;color:var(--ink)!important;font-size:15px!important}
+.chk input{width:20px;height:20px;min-height:0;flex:none;margin:0;accent-color:var(--rose)}
+.alinks{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:15px}
+.aerr{color:var(--rose);min-height:1.2em;margin:0;font-size:14px}
+.reckey{font:600 18px/1.5 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em;background:var(--paper2);border:1px dashed var(--taupe);border-radius:12px;padding:14px;text-align:center;overflow-wrap:anywhere;user-select:all}
+button:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
+<div id="auth" hidden></div>
+<div id="app" hidden>
 <header class="top">
-  <div class="brand"><b id="appName">Sheila's Space</b><div class="btns" style="align-items:center"><span id="todayLbl"></span><button class="tg" id="themeBtn" type="button">Dark mode</button></div></div>
+  <div class="brand"><b id="appName">Sheila's Space</b><div class="btns" style="align-items:center"><span id="todayLbl"></span><span id="sync" class="muted" style="font-size:13px"></span><button class="tg" id="themeBtn" type="button">Dark mode</button></div></div>
   <nav id="nav" aria-label="Sections"></nav>
   <nav id="sub" class="sub" aria-label="Pages"></nav>
 </header>
 <main id="view"></main>
+</div>
 <div id="layer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 {
 const NAMES={home:'Home',wellness:'Self-Care',habits:'Habits',sleep:'Sleep',cycle:'Cycle',journal:'Journal',gratitude:'Gratitude',comfort:'Comfort Box',letters:'Future Me',verse:'Daily Verse',prayer:'Prayer Journal',reading:'Bible Reading',budget:'Budget',bills:'Bills',wishlist:'Wishlist',planner:'Planner',vision:'Vision Board',walk:'Walking',corner:'Savings & Travel',dates:'Date Jar',important:'Special Dates',memories:'Memories',backup:'Settings'};
@@ -226,9 +240,7 @@ const CKIND=['Sweet note','Photo','Song','Verse','Reminder'];
 const PRI=['Normal','Important'];
 const KEY='sheila-space-v1';
 const DEF=()=>({name:'Sheila',vision:[],tx:[],limits:{},fav:[],vnotes:{},journal:[],letters:[],checkins:{},therapy:[],gratitude:{},walks:{},walkGoal:6000,ipon:[],travel:[],theme:'auto',habits:['Drink 8 glasses of water','Take vitamins','Skincare','Sleep before 11 PM'].map((n,i)=>({id:'h'+i,name:n})),hlog:{},sleep:{},periods:[],comfort:[],prayers:[],reading:{plan:'gospels',done:{}},bills:[],wish:[],dateIdeas:IDEAS.map((t,i)=>({id:'d'+i,text:t,done:false})),dates:[],memories:[],tasks:[]});
-let storeOK=true,S=DEF();
-try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(DEF(),JSON.parse(r))}catch(e){storeOK=false}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){toast(storeOK?'Storage is full. Try deleting a few photos.':'Saving isn\u2019t available in this browser.');return false}};
+let S=DEF(),save=()=>true;
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const peso=n=>((Number(n)||0)<0?'−':'')+'₱'+Math.abs(Number(n)||0).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
@@ -268,8 +280,7 @@ V.home=()=>{
  const lim=S.limits[m]||0,steps=(S.walks[TODAY()]||{}).steps||0;
  const it=S.ipon.reduce((a,x)=>a+x.target,0),is=S.ipon.reduce((a,x)=>a+x.saved,0);
  const sealed=S.letters.filter(l=>l.open>TODAY()).length;
- const lb=S.lastBackup,needBk=!lb||daysTo(lb)<-14;
- return `<div class="head"><h1>${g}, ${esc(S.name)}.</h1></div>${needBk?`<div class="warn btns" style="justify-content:space-between;align-items:center"><span>${lb?'It\u2019s been a while since your last backup.':'Save a backup so your entries are safe if you change phones.'}</span><a href="#backup">Back up now</a></div>`:''}
+ return `<div class="head"><h1>${g}, ${esc(S.name)}.</h1></div>
  <section class="hero">
   <div class="verse"><div class="ref">Verse for today</div><q>${esc(v[1])}</q><div class="btns" style="justify-content:space-between;align-items:center"><span class="ref">${esc(v[0])} (KJV)</span><a href="#verse" style="color:inherit">Write a reflection</a></div></div>
   <div class="week"><h3>This week</h3><p class="muted">Every filled square is a day you took care of yourself.</p>
@@ -350,7 +361,7 @@ V.wellness=()=>{
  <details><summary><b>5-4-3-2-1 grounding</b></summary><p style="margin-top:6px">Notice 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell and 1 you can taste. It brings your mind back to the present.</p></details></div></div>
  <div class="card stack"><h3>Therapy notes</h3><form id="fTh" class="stack"><div class="row"><div><label for="thD">Session date</label><input id="thD" type="date" value="${t}"></div><div><label for="thW">With whom / where</label><input id="thW"></div></div><div><label for="thN">What I learned</label><textarea id="thN" required></textarea></div><div><label for="thH">Homework or next steps</label><input id="thH"></div><button>Save session</button></form>
  ${S.therapy.length?`<ul class="list">${[...S.therapy].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`<li><div><b>${nice(s.date)}</b>${s.who?` <span class="muted">· ${esc(s.who)}</span>`:''}<p style="white-space:pre-wrap">${esc(s.notes)}</p>${s.hw?`<p class="muted">Homework: ${esc(s.hw)}</p>`:''}</div><button class="sm del" data-a="thdel" data-id="${s.id}">×</button></li>`).join('')}</ul>`:''}</div>
- <div class="help stack"><h3>If it gets too heavy</h3><p>You don\u2019t have to go through it alone. Call the NCMH Crisis Hotline, free and open 24/7: <b>1553</b> (landline), <b>0919-057-1553</b> (Smart/TNT), <b>0917-899-8727</b> o <b>0966-351-4518</b> (Globe/TM). You can also call Allen or anyone you trust.</p></div>
+ <div class="help stack"><h3>If it gets too heavy</h3><p>You don\u2019t have to go through it alone. Call the NCMH Crisis Hotline, free and open 24/7: <b>1553</b> (landline), <b>0919-057-1553</b> (Smart/TNT), <b>0917-899-8727</b> o <b>0966-351-4518</b> (Globe/TM). You can also call someone you love and trust.</p></div>
  </div>`};
 
 V.gratitude=()=>{
@@ -385,11 +396,15 @@ V.corner=()=>{
   <form id="fTr" class="card tint stack"><h3>New destination</h3><div><label for="trP">Place</label><input id="trP" required placeholder="e.g. Batanes, Seoul"></div><div class="row"><div><label for="trW">When</label><input id="trW" type="date"></div><div><label for="trC">Estimated budget (₱)</label><input id="trC" type="number" min="0" inputmode="decimal"></div></div><div><label for="trN">What we want to do there</label><input id="trN"></div><button>Add destination</button></form></div>
  </div>`};
 
-V.backup=()=>`<div class="head"><div><h1>Settings</h1><p>All your data is saved only in this browser on this device. No one else can see it, but it will be lost if the browser data is cleared, so back it up from time to time.</p></div></div>
- <div class="grid"><form id="fName" class="card stack"><h3>Your name</h3><div><label for="nm">Name</label><input id="nm" value="${esc(S.name)}"></div><button>Save</button><div><label for="thm">Theme</label><select id="thm">${[['auto','Match my phone'],['light','Light'],['dark','Dark']].map(([k,l])=>`<option value="${k}"${S.theme===k?' selected':''}>${l}</option>`).join('')}</select></div></form>
- <div class="card stack"><h3>Backup</h3><p class="muted">Copy this text and save it in your Notes app or send it to yourself. It includes everything, photos too.</p><textarea id="bk" readonly style="min-height:120px;font-size:13px">${esc(JSON.stringify(S))}</textarea><div class="btns"><button data-a="dlbk">Download backup file</button><button class="ghost" data-a="copybk">Copy backup</button></div></div>
- <form id="fRes" class="card stack"><h3>Restore</h3><p class="muted">Paste your backup text or choose a file. This replaces your current data.</p><div><label for="rT">Backup text</label><textarea id="rT"></textarea></div><div><label for="rF">Or choose a file</label><input id="rF" type="file" accept=".json,.txt,application/json,text/plain"></div><button>Restore</button></form>
- <div class="card stack"><h3>Delete everything</h3><p class="muted">Make a backup before doing this.</p><button class="ghost" style="color:var(--rose)" data-a="wipe">Delete all data</button></div></div>`;
+V.backup=()=>`<div class="head"><div><h1>Settings</h1><p>Your entries are encrypted with your password before they leave your phone. Only you can read them, even if you open the database.</p></div></div>
+ <div class="grid">
+ <div class="card stack"><h3>Account</h3><p>Signed in as <b>${esc(ME?ME.email:'')}</b></p><p class="muted">Synced to your account. Log in on any phone or computer to see the same entries.</p><button class="ghost" data-a="logout">Log out</button></div>
+ <form id="fName" class="card stack"><h3>Your name</h3><div><label for="nm">Name</label><input id="nm" value="${esc(S.name)}"></div><button>Save</button><div><label for="thm">Theme</label><select id="thm">${[['auto','Match my phone'],['light','Light'],['dark','Dark']].map(([k,l])=>`<option value="${k}"${S.theme===k?' selected':''}>${l}</option>`).join('')}</select></div></form>
+ <form id="fCpw" class="card stack"><h3>Change password</h3><div><label for="cp0">Current password</label><input id="cp0" type="password" autocomplete="current-password" required></div><div><label for="cp1">New password</label><input id="cp1" type="password" autocomplete="new-password" minlength="8" required></div><div><label for="cp2">Confirm new password</label><input id="cp2" type="password" autocomplete="new-password" required></div><button>Change password</button></form>
+ <form id="fRk" class="card stack"><h3>Recovery key</h3><p class="muted">Lost your recovery key? Make a new one. The old one will stop working.</p><div><label for="rk0">Password</label><input id="rk0" type="password" autocomplete="current-password" required></div><button class="ghost">Make a new recovery key</button><div id="rkOut"></div></form>
+ <div class="card stack"><h3>Export a copy</h3><p class="muted">Optional. Download all your entries as a file, or copy them as text.</p><div class="btns"><button data-a="dlbk">Download file</button><button class="ghost" data-a="copybk">Copy as text</button></div></div>
+ <form id="fRes" class="card stack"><h3>Import</h3><p class="muted">Paste an exported copy or choose a file. This replaces the entries in your account.</p><div><label for="rT">Exported text</label><textarea id="rT"></textarea></div><div><label for="rF">Or choose a file</label><input id="rF" type="file" accept=".json,.txt,application/json,text/plain"></div><button>Import</button></form>
+ <div class="card stack"><h3>Delete all entries</h3><p class="muted">Export a copy first if you might want them later.</p><button class="ghost" style="color:var(--rose)" data-a="wipe">Delete all my entries</button></div></div>`;
 
 V.habits=()=>{
  const t=TODAY(),days=[...Array(7)].map((_,i)=>addDays(t,i-6)),done=(S.hlog[t]||[]).filter(id=>S.habits.some(h=>h.id===id)).length;
@@ -424,8 +439,8 @@ V.comfort=()=>{
  const p=S.comfort.find(x=>x.id===cPick);
  return `<div class="head"><div><h1>Comfort Box</h1><p>Sweet messages, photos, songs and verses to open on heavy days.</p></div></div>
  <div class="grid"><div class="jar">${p?`<span class="chip" style="align-self:flex-start">${esc(p.kind)}</span>${p.img?`<img src="${esc(p.img)}" alt="" style="max-width:100%;border-radius:14px">`:''}${p.text?`<p class="big2">${esc(p.text)}</p>`:''}${safeUrl(p.link)?`<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener" style="color:inherit">Open link</a>`:''}${p.from?`<p style="opacity:.8">From ${esc(p.from)}</p>`:''}`:`<p class="big2">${S.comfort.length?'Need a little comfort right now?':'Your comfort box is empty for now.'}</p>`}<button style="align-self:flex-start;background:var(--bg);color:var(--ink);border-color:var(--bg)" data-a="cpick"${S.comfort.length?'':' disabled'}>${p?'Open another':'Open the comfort box'}</button></div>
- <form id="fCo" class="card stack"><h3>Add to the box</h3><div class="row"><div><label for="coK">Type</label><select id="coK">${opts(CKIND)}</select></div><div><label for="coF">From</label><input id="coF" placeholder="e.g. Allen"></div></div><div><label for="coT">Message</label><textarea id="coT" placeholder="e.g. You are so loved. One day at a time, okay?"></textarea></div><div><label for="coI">Photo (optional)</label><input id="coI" type="file" accept="image/*"></div><div><label for="coL">Song or link (optional)</label><input id="coL" type="url" placeholder="https://"></div><button>Add</button></form></div>
- <h2 style="margin:28px 0 12px">Everything in the box</h2>${S.comfort.length?`<div class="board">${S.comfort.map(x=>`<div class="vc"><div class="in stack"><div class="btns" style="justify-content:space-between;align-items:center"><span class="chip">${esc(x.kind)}</span><button class="sm del" data-a="codel" data-id="${x.id}">Delete</button></div>${itemBody(x)}</div></div>`).join('')}</div>`:'<p class="empty">Add screenshots of sweet messages, favorite photos or songs. Ask Allen to send some too.</p>'}`};
+ <form id="fCo" class="card stack"><h3>Add to the box</h3><div class="row"><div><label for="coK">Type</label><select id="coK">${opts(CKIND)}</select></div><div><label for="coF">From</label><input id="coF" placeholder="e.g. My love"></div></div><div><label for="coT">Message</label><textarea id="coT" placeholder="e.g. You are so loved. One day at a time, okay?"></textarea></div><div><label for="coI">Photo (optional)</label><input id="coI" type="file" accept="image/*"></div><div><label for="coL">Song or link (optional)</label><input id="coL" type="url" placeholder="https://"></div><button>Add</button></form></div>
+ <h2 style="margin:28px 0 12px">Everything in the box</h2>${S.comfort.length?`<div class="board">${S.comfort.map(x=>`<div class="vc"><div class="in stack"><div class="btns" style="justify-content:space-between;align-items:center"><span class="chip">${esc(x.kind)}</span><button class="sm del" data-a="codel" data-id="${x.id}">Delete</button></div>${itemBody(x)}</div></div>`).join('')}</div>`:'<p class="empty">Add screenshots of sweet messages, favorite photos or songs. Ask your partner to send some too.</p>'}`};
 
 V.prayer=()=>{
  const pr=S.prayers.filter(x=>x.status!=='Answered').sort((a,b)=>b.date.localeCompare(a.date)),an=S.prayers.filter(x=>x.status==='Answered').sort((a,b)=>(b.ans||'').localeCompare(a.ans||''));
@@ -471,7 +486,7 @@ V.important=()=>{
 
 V.memories=()=>{
  const L=[...S.memories].sort((a,b)=>b.date.localeCompare(a.date));
- return `<div class="head"><div><h1>Our Memories</h1><p>The story of Allen and ${esc(S.name)}, one moment at a time.</p></div><div class="stat"><small>Memories</small><b>${L.length}</b></div></div>
+ return `<div class="head"><div><h1>Our Memories</h1><p>Our story, one moment at a time.</p></div><div class="stat"><small>Memories</small><b>${L.length}</b></div></div>
  <div class="grid"><form id="fMe" class="card stack"><h3>Add a memory</h3><div class="row"><div><label for="meD">Date</label><input id="meD" type="date" value="${TODAY()}" required></div><div><label for="meT">Title</label><input id="meT" required placeholder="e.g. Our first date"></div></div><div><label for="meS">The story</label><textarea id="meS"></textarea></div><div><label for="meI">Photo (optional)</label><input id="meI" type="file" accept="image/*"></div><button>Save memory</button></form>
  <div class="card">${L.length?`<ul class="tl">${L.map(x=>`<li><div class="muted">${nice(x.date)}</div><h3 style="margin:2px 0 4px">${esc(x.title)}</h3>${x.story?`<p style="white-space:pre-wrap">${esc(x.story)}</p>`:''}${x.img?`<img src="${esc(x.img)}" alt="">`:''}<button class="sm del" data-a="medel" data-id="${x.id}">Delete</button></li>`).join('')}</ul>`:'<p class="empty">Your timeline will grow here.</p>'}</div></div>`};
 
@@ -506,7 +521,7 @@ function render(){
  const sb=$('#sub');sb.style.display=cg[1].length>1?'':'none';sb.innerHTML=cg[1].length>1?cg[1].map(k=>`<a href="#${k}" class="${k===r?'on':''}">${NAMES[k]}</a>`).join(''):'';
  $('#appName').textContent=S.name+"'s Space";
  $('#todayLbl').textContent=new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric'});
- $('#view').innerHTML=(storeOK?'':'<div class="warn">This browser can\u2019t save data, so everything will be lost when you close it. Try opening the app in another browser.</div>')+V[r]();
+ $('#view').innerHTML=V[r]();
  for(const on of document.querySelectorAll('nav .on'))on.scrollIntoView({block:'nearest',inline:'center'});
  if(ro){ro.disconnect();ro=null}
  if(r==='wellness'){ro=new ResizeObserver(drawMood);ro.observe($('#ms'));
@@ -540,6 +555,8 @@ document.addEventListener('submit',e=>{
  if(id==='fIm'){S.dates.push({id:uid(),title:val('imT'),date:val('imD'),yearly:$('#imY').checked});go()}
  if(id==='fMe'){const f=$('#meI').files[0],o={date:val('meD')||TODAY(),title:val('meT'),story:$('#meS').value.trim()},add=img=>{S.memories.push({id:uid(),...o,img});if(!save())S.memories.pop();render();toast('Memory saved.')};f?shrink(f,add):add('')}
  if(id==='fTa'){S.tasks.push({id:uid(),date:pDate,text:val('taT'),pri:val('taP'),done:false});go()}
+ if(id==='fCpw'){const n=$('#cp1').value;if(n!==$('#cp2').value)return toast('New passwords don\u2019t match.');if(n.length<8)return toast('Use at least 8 characters.');changePw($('#cp0').value,n).then(()=>{e.target.reset();toast('Password changed.')},x=>toast(errMsg(x)))}
+ if(id==='fRk'){regenRec($('#rk0').value).then(k=>{e.target.reset();const o=$('#rkOut');o.innerHTML='<p><b>Your new recovery key. Save it now:</b></p><div class="reckey"></div>';o.querySelector('.reckey').textContent=k},x=>toast(errMsg(x)))}
  if(id==='fName'){S.name=val('nm')||'Sheila';go();toast('Name updated.')}
  if(id==='fRes'){const f=$('#rF').files[0],apply=txt=>{try{const d=JSON.parse(txt);if(typeof d!=='object'||!d)throw 0;S=Object.assign(DEF(),d);if(!S.reading||!S.reading.done)S.reading={plan:'gospels',done:{}};go();toast('Data restored!')}catch(x){toast('That backup isn\u2019t valid.')}};if(f){const rd=new FileReader();rd.onload=()=>apply(rd.result);rd.readAsText(f)}else if(val('rT'))apply(val('rT'));else toast('No backup provided.')}
 });
@@ -567,6 +584,7 @@ document.addEventListener('click',e=>{
  if(a==='idel')rm('ipon','Delete this savings goal?');
  if(a==='tdel')rm('travel','Delete this destination?');
  if(a==='dlbk'){const bl=new Blob([JSON.stringify(S)],{type:'application/json'}),u=URL.createObjectURL(bl),l=document.createElement('a');l.href=u;l.download='sheila-space-backup-'+TODAY()+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);S.lastBackup=TODAY();save();toast('Backup downloaded.')}
+ if(a==='logout'){logout();return}
  if(a==='copybk'){navigator.clipboard.writeText(JSON.stringify(S)).then(()=>toast('Backup copied!'),()=>{$('#bk').select();toast('Select all and copy it manually.')})}
  if(a==='hdel')ask('Delete this habit?',()=>{S.habits=S.habits.filter(h=>h.id!==id);go()});
  if(a==='htog'){const d=b.dataset.d,l=S.hlog[d]||[];S.hlog[d]=l.includes(id)?l.filter(x=>x!==id):[...l,id];go()}
@@ -594,7 +612,7 @@ document.addEventListener('click',e=>{
  if(a==='tmove'){S.tasks.forEach(x=>{if(!x.done&&x.date<TODAY())x.date=TODAY()});go()}
  if(a==='pprev'){pDate=addDays(pDate,-1);render()}
  if(a==='pnext'){pDate=addDays(pDate,1);render()}
- if(a==='wipe')ask('This deletes ALL your data on this device. Are you sure?',()=>{S=DEF();go()});
+ if(a==='wipe')ask('This deletes ALL your entries in your account. Are you sure?',()=>{const n=S.name;S=DEF();S.name=n;go()});
 });
 
 document.addEventListener('change',e=>{
@@ -609,7 +627,134 @@ document.addEventListener('change',e=>{
 document.addEventListener('input',e=>{if(e.target.id==='jS'){jq=e.target.value;const p=e.target.selectionStart;render();const s=$('#jS');s.focus();s.setSelectionRange(p,p)}});
 $('#themeBtn').onclick=()=>{S.theme=isDark()?'light':'dark';go()};
 addEventListener('hashchange',()=>{vOff=0;openJ=null;cPick=null;dPick=null;render();scrollTo(0,0)});
-render();
+// ===== Accounts, encryption and sync =====
+const SB_URL='https://yccwlaebuzsylovbupzx.supabase.co',SB_KEY='sb_publishable_h5Dce11JqBYHPwhrwMZLiQ_7w2WLzMv',FN=SB_URL+'/functions/v1/account';
+const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'ss-auth'}});
+const TE=new TextEncoder(),TD=new TextDecoder(),C=crypto.subtle;
+const b64=u=>{let s='';new Uint8Array(u).forEach(b=>s+=String.fromCharCode(b));return btoa(s)};
+const ub64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const rnd=n=>crypto.getRandomValues(new Uint8Array(n));
+const hex=async t=>[...new Uint8Array(await C.digest('SHA-256',TE.encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function kdf(secret,salt,iter){const base=await C.importKey('raw',TE.encode(secret),'PBKDF2',false,['deriveKey']);return C.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function seal(key,bytes){const iv=rnd(12);return{iv:b64(iv),ct:b64(await C.encrypt({name:'AES-GCM',iv},key,bytes))}}
+async function open_(key,ct,iv){return new Uint8Array(await C.decrypt({name:'AES-GCM',iv:ub64(iv)},key,ub64(ct)))}
+const useKey=raw=>C.importKey('raw',raw,'AES-GCM',false,['encrypt','decrypt']);
+const B32='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+function newRecKey(){const b=rnd(20);let bits='',s='';b.forEach(x=>bits+=x.toString(2).padStart(8,'0'));for(let i=0;i<bits.length;i+=5)s+=B32[parseInt(bits.slice(i,i+5),2)];return s.match(/.{4}/g).join('-')}
+const normRec=k=>String(k||'').toUpperCase().replace(/[^A-Z2-7]/g,'');
+const recProof=k=>hex('sheila-space-proof|'+normRec(k));
+const REC_ITER=100000;
+// device key store (non-extractable key kept in IndexedDB, so a remembered device doesn't need the password every time)
+function idb(){return new Promise((ok,no)=>{const r=indexedDB.open('sheila-space',1);r.onupgradeneeded=()=>r.result.createObjectStore('keys');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+async function kv(op,id,val){try{const db=await idb();return await new Promise((ok,no)=>{const t=db.transaction('keys',op==='get'?'readonly':'readwrite'),s=t.objectStore('keys'),r=op==='get'?s.get(id):op==='put'?s.put(val,id):s.delete(id);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}catch(e){return null}}
+async function callFn(body,token){const r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(token||SB_KEY)},body:JSON.stringify(body)});let j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(j.error||'Something went wrong. Try again.');return j}
+let ME=null,DK=null,dirty=false,saveT=null,saving=false;
+const errMsg=e=>{const m=(e&&e.message)||String(e);return /invalid login/i.test(m)?'Wrong email or password.':/fetch|network/i.test(m)?'No internet connection. Try again.':m};
+const cacheK=()=>'ss-cache-'+ME.id,dirtyK=()=>'ss-dirty-'+ME.id;
+function status(t){const e=$('#sync');if(e)e.textContent=t}
+async function pushNow(){
+ if(!ME||!DK||saving||!dirty)return;saving=true;clearTimeout(saveT);status('Saving…');
+ try{const c=await seal(DK,TE.encode(JSON.stringify(S)));const now=new Date().toISOString();
+  try{localStorage.setItem(cacheK(),JSON.stringify({data:c.ct,iv:c.iv,at:now}));localStorage.setItem(dirtyK(),'1')}catch(e){}
+  dirty=false;const{error}=await sb.from('vaults').update({data:c.ct,data_iv:c.iv,updated_at:now}).eq('user_id',ME.id);
+  if(error)throw error;try{localStorage.removeItem(dirtyK())}catch(e){}status('Saved')}
+ catch(e){dirty=true;status('Offline · will sync later')}
+ saving=false;if(dirty&&navigator.onLine)saveT=setTimeout(pushNow,5000)}
+save=()=>{dirty=true;clearTimeout(saveT);saveT=setTimeout(pushNow,1200);status('Saving…');return true};
+addEventListener('online',()=>{if(dirty)pushNow()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')pushNow()});
+async function loadVault(){
+ const{data:v,error}=await sb.from('vaults').select('*').eq('user_id',ME.id).maybeSingle();
+ let src=null;try{src=JSON.parse(localStorage.getItem(cacheK())||'null')}catch(e){}
+ const localDirty=(()=>{try{return localStorage.getItem(dirtyK())==='1'}catch(e){return false}})();
+ if(error){if(!src)throw new Error('No internet connection. Try again.');}else if(!v)return null;
+ let use=src;if(v&&v.data&&!(localDirty&&src))use={data:v.data,iv:v.data_iv};
+ if(use&&use.data){const st=JSON.parse(TD.decode(await open_(DK,use.data,use.iv)));S=Object.assign(DEF(),st)}else S=DEF();
+ if(localDirty&&src){dirty=true;setTimeout(pushNow,500)}
+ return v||{}}
+async function createVault(pw,name,imported){
+ const raw=rnd(32),salt=rnd(16),rsalt=rnd(16),rec=newRecKey();
+ const a=await seal(await kdf(pw,salt,310000),raw),b=await seal(await kdf(normRec(rec),rsalt,REC_ITER),raw);
+ DK=await useKey(raw);S=Object.assign(DEF(),imported||{});S.name=name||S.name;
+ const c=await seal(DK,TE.encode(JSON.stringify(S)));
+ const{error}=await sb.from('vaults').upsert({user_id:ME.id,salt:b64(salt),iter:310000,wk_pw:a.ct,iv_pw:a.iv,rec_salt:b64(rsalt),wk_rec:b.ct,iv_rec:b.iv,data:c.ct,data_iv:c.iv,updated_at:new Date().toISOString()});
+ if(error)throw error;return rec}
+async function rawFromPw(v,pw){return open_(await kdf(pw,ub64(v.salt),v.iter),v.wk_pw,v.iv_pw)}
+async function enterApp(remember){if(remember)await kv('put',ME.id,DK);$('#auth').hidden=true;$('#app').hidden=false;location.hash=location.hash||'#home';render();status('Saved')}
+function oldLocal(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
+
+const AV={};
+const card=(t,body)=>`<div class="authbox"><div class="logo">S</div><h1>${t}</h1>${body}</div>`;
+const field=(id,l,type='text',extra='')=>`<div><label for="${id}">${l}</label><input id="${id}" type="${type}" ${extra}></div>`;
+AV.login=()=>card('Welcome back',`<form id="aLogin" class="stack">${field('lE','Email','email','autocomplete="username" required')}${field('lP','Password','password','autocomplete="current-password" required')}<label class="chk"><input type="checkbox" id="lR" checked>Keep me signed in on this device</label><button>Log in</button><p class="aerr" id="aErr"></p></form><div class="alinks"><a href="#" data-av="forgot">Forgot password?</a><a href="#" data-av="signup">Create an account</a></div>`);
+AV.signup=()=>card('Create your account',`<form id="aSignup" class="stack">${field('sN','Your name','text','required maxlength="40"')}${field('sE','Email','email','autocomplete="username" required')}${field('sP','Password (at least 8 characters)','password','autocomplete="new-password" minlength="8" required')}${field('sP2','Confirm password','password','autocomplete="new-password" required')}${field('sC','Invite code','text','required autocapitalize="characters" placeholder="XXXX-XXXX-XXXX"')}${oldLocal()?'<label class="chk"><input type="checkbox" id="sI" checked>Bring over the entries already saved on this device</label>':''}<button>Create account</button><p class="aerr" id="aErr"></p></form><div class="alinks"><a href="#" data-av="login">I already have an account</a></div>`);
+AV.forgot=()=>card('Reset your password',`<p class="muted">Use the recovery key you saved when you created your account. Your entries stay safe.</p><form id="aForgot" class="stack">${field('fE','Email','email','autocomplete="username" required')}${field('fK','Recovery key','text','required autocapitalize="characters" placeholder="XXXX-XXXX-…"')}${field('fP','New password','password','autocomplete="new-password" minlength="8" required')}${field('fP2','Confirm new password','password','autocomplete="new-password" required')}<button>Reset password</button><p class="aerr" id="aErr"></p></form><p class="muted" style="font-size:14px">Lost your recovery key too? Because your entries are encrypted, no one can open them without your password or recovery key.</p><div class="alinks"><a href="#" data-av="login">Back to log in</a></div>`);
+AV.unlock=()=>card('Unlock your space',`<p class="muted">Signed in as <b>${esc(ME&&ME.email)}</b></p><form id="aUnlock" class="stack">${field('uP','Password','password','autocomplete="current-password" required')}<label class="chk"><input type="checkbox" id="uR" checked>Keep me signed in on this device</label><button>Unlock</button><p class="aerr" id="aErr"></p></form><div class="alinks"><a href="#" data-av="forgot">Forgot password?</a><a href="#" data-av="logout">Log out</a></div>`);
+let pendingRec='',afterRec=null;
+AV.recovery=()=>card('Save your recovery key',`<p>This key is the <b>only</b> way back into your account if you forget your password. Keep it somewhere safe, like your Notes app or a screenshot.</p><div class="reckey" id="rk">${esc(pendingRec)}</div><div class="btns"><button type="button" data-av="rcopy">Copy</button><button type="button" class="ghost" data-av="rdl">Download</button></div><label class="chk"><input type="checkbox" id="rOk">I saved my recovery key</label><button type="button" data-av="rdone" id="rDone" disabled>Continue</button>`);
+AV.loading=()=>card('Opening your space…','<p class="muted">Decrypting your entries.</p>');
+function showAuth(v){applyTheme();$('#app').hidden=true;$('#auth').hidden=false;$('#auth').innerHTML=AV[v]();const f=$('#auth input');if(f&&v!=='recovery')f.focus()}
+const aErr=m=>{const e=$('#aErr');if(e)e.textContent=m};
+const busy=(f,on)=>{const b=f.querySelector('button');if(b){b.disabled=on;b.dataset.t=b.dataset.t||b.textContent;b.textContent=on?'Please wait…':b.dataset.t}};
+function showRecovery(key,next){pendingRec=key;afterRec=next;showAuth('recovery')}
+
+$('#auth').addEventListener('submit',async e=>{
+ e.preventDefault();const f=e.target,id=f.id;aErr('');busy(f,true);
+ try{
+  if(id==='aLogin'){const{data,error}=await sb.auth.signInWithPassword({email:val('lE'),password:$('#lP').value});if(error)throw error;ME=data.user;const pw=$('#lP').value,rem=$('#lR').checked;
+   const{data:v,error:e2}=await sb.from('vaults').select('*').eq('user_id',ME.id).maybeSingle();if(e2)throw e2;
+   if(!v){const rec=await createVault(pw,(ME.user_metadata||{}).name||'',null);await callFn({action:'setproof',proof:await recProof(rec)},(await sb.auth.getSession()).data.session.access_token);return showRecovery(rec,()=>enterApp(rem))}
+   DK=await useKey(await rawFromPw(v,pw));await loadVault();await enterApp(rem)}
+  if(id==='aSignup'){const pw=$('#sP').value;if(pw!==$('#sP2').value)throw new Error('Passwords don’t match.');if(pw.length<8)throw new Error('Password must be at least 8 characters.');
+   const email=val('sE'),name=val('sN');const rec=newRecKey();
+   // the account is created with the proof first, then the vault is created with this same key
+   await callFn({action:'signup',code:val('sC'),email,password:pw,name,proof:await recProof(rec)});
+   const{data,error}=await sb.auth.signInWithPassword({email,password:pw});if(error)throw error;ME=data.user;
+   const imp=$('#sI')&&$('#sI').checked?oldLocal():null;
+   const raw=rnd(32),salt=rnd(16),rsalt=rnd(16);const a=await seal(await kdf(pw,salt,310000),raw),b=await seal(await kdf(normRec(rec),rsalt,REC_ITER),raw);
+   DK=await useKey(raw);S=Object.assign(DEF(),imp||{});S.name=name||'Me';const c=await seal(DK,TE.encode(JSON.stringify(S)));
+   const{error:e3}=await sb.from('vaults').insert({user_id:ME.id,salt:b64(salt),iter:310000,wk_pw:a.ct,iv_pw:a.iv,rec_salt:b64(rsalt),wk_rec:b.ct,iv_rec:b.iv,data:c.ct,data_iv:c.iv});if(e3)throw e3;
+   if(imp)try{localStorage.removeItem(KEY)}catch(x){}
+   return showRecovery(rec,()=>enterApp(true))}
+  if(id==='aForgot'){const pw=$('#fP').value,rk=val('fK'),email=val('fE');if(pw!==$('#fP2').value)throw new Error('Passwords don’t match.');if(normRec(rk).length!==32)throw new Error('That recovery key doesn’t look complete.');
+   await callFn({action:'reset',email,password:pw,proof:await recProof(rk)});
+   const{data,error}=await sb.auth.signInWithPassword({email,password:pw});if(error)throw error;ME=data.user;
+   const{data:v,error:e2}=await sb.from('vaults').select('*').eq('user_id',ME.id).single();if(e2)throw e2;
+   const raw=await open_(await kdf(normRec(rk),ub64(v.rec_salt),REC_ITER),v.wk_rec,v.iv_rec),salt=rnd(16),a=await seal(await kdf(pw,salt,310000),raw);
+   const{error:e3}=await sb.from('vaults').update({salt:b64(salt),iter:310000,wk_pw:a.ct,iv_pw:a.iv}).eq('user_id',ME.id);if(e3)throw e3;
+   DK=await useKey(raw);await loadVault();await enterApp(true);toast('Password reset. Welcome back!')}
+  if(id==='aUnlock'){const{data:v,error}=await sb.from('vaults').select('*').eq('user_id',ME.id).single();if(error)throw error;
+   try{DK=await useKey(await rawFromPw(v,$('#uP').value))}catch(x){throw new Error('Wrong password.')}await loadVault();await enterApp($('#uR').checked)}
+ }catch(x){aErr(errMsg(x))}
+ busy(f,false)});
+$('#auth').addEventListener('click',async e=>{
+ const a=e.target.closest('[data-av]');if(!a)return;e.preventDefault();const v=a.dataset.av;
+ if(AV[v]&&!['recovery','loading'].includes(v))return showAuth(v);
+ if(v==='logout')return logout();
+ if(v==='rcopy')navigator.clipboard.writeText(pendingRec).then(()=>toast('Recovery key copied.'),()=>toast('Select the key and copy it.'));
+ if(v==='rdl')dl('sheila-space-recovery-key.txt','Sheila’s Space recovery key\n\n'+pendingRec+'\n\nKeep this private. You need it to reset your password.','text/plain');
+ if(v==='rdone'&&afterRec){const n=afterRec;afterRec=null;pendingRec='';n()}});
+$('#auth').addEventListener('change',e=>{if(e.target.id==='rOk')$('#rDone').disabled=!e.target.checked});
+function dl(name,text,type){const u=URL.createObjectURL(new Blob([text],{type})),l=document.createElement('a');l.href=u;l.download=name;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+async function logout(){try{await pushNow()}catch(e){}if(ME)await kv('del',ME.id);try{if(ME){localStorage.removeItem(cacheK());localStorage.removeItem(dirtyK())}}catch(e){}await sb.auth.signOut().catch(()=>{});ME=null;DK=null;S=DEF();dirty=false;history.replaceState(null,'',location.pathname);showAuth('login')}
+// settings-side account actions
+async function changePw(cur,nw){const{data:v,error}=await sb.from('vaults').select('*').eq('user_id',ME.id).single();if(error)throw error;let raw;try{raw=await rawFromPw(v,cur)}catch(x){throw new Error('Current password is wrong.')}
+ const{error:e1}=await sb.auth.updateUser({password:nw});if(e1)throw e1;const salt=rnd(16),a=await seal(await kdf(nw,salt,310000),raw);
+ const{error:e2}=await sb.from('vaults').update({salt:b64(salt),iter:310000,wk_pw:a.ct,iv_pw:a.iv}).eq('user_id',ME.id);if(e2)throw e2}
+async function regenRec(cur){const{data:v,error}=await sb.from('vaults').select('*').eq('user_id',ME.id).single();if(error)throw error;let raw;try{raw=await rawFromPw(v,cur)}catch(x){throw new Error('Password is wrong.')}
+ const rec=newRecKey(),rsalt=rnd(16),b=await seal(await kdf(normRec(rec),rsalt,REC_ITER),raw);
+ await callFn({action:'setproof',proof:await recProof(rec)},(await sb.auth.getSession()).data.session.access_token);
+ const{error:e2}=await sb.from('vaults').update({rec_salt:b64(rsalt),wk_rec:b.ct,iv_rec:b.iv}).eq('user_id',ME.id);if(e2)throw e2;return rec}
+async function boot(){
+ showAuth('loading');
+ let s=null;try{s=(await sb.auth.getSession()).data.session}catch(e){}
+ if(!s)return showAuth('login');
+ ME=s.user;DK=await kv('get',ME.id);
+ if(!DK)return showAuth('unlock');
+ try{const v=await loadVault();if(v===null){DK=null;return showAuth('unlock')}await enterApp(false)}catch(e){DK=null;showAuth('unlock');aErr(errMsg(e))}}
+sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT'&&ME){ME=null;DK=null;S=DEF();showAuth('login')}});
+
+boot();
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 }

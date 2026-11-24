@@ -166,6 +166,7 @@ nav.sub a.on{background:var(--roseBg);color:var(--ink);border-color:var(--rose)}
 @media(max-width:520px){.hgrid{grid-template-columns:repeat(7,minmax(0,1fr)) 2.6em;gap:5px}.hgrid .hn{grid-column:1/-1;margin-top:6px}.hgrid .hn0{display:none}}
 .ring{display:grid;place-items:center;width:150px;height:150px;border-radius:50%;margin:0 auto}
 .ring div{width:118px;height:118px;border-radius:50%;background:var(--paper);display:grid;place-items:center;text-align:center;line-height:1.1}
+[hidden]{display:none!important}
 #auth{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
 .authbox{width:100%;max-width:420px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:clamp(22px,5vw,34px);display:flex;flex-direction:column;gap:14px}
 .authbox .logo{width:54px;height:54px;border-radius:50%;background:var(--ink);color:var(--roseBg);display:grid;place-items:center;font-family:"Instrument Serif",Georgia,serif;font-size:32px}
@@ -176,6 +177,9 @@ nav.sub a.on{background:var(--roseBg);color:var(--ink);border-color:var(--rose)}
 .aerr{color:var(--rose);min-height:1.2em;margin:0;font-size:14px}
 .reckey{font:600 18px/1.5 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em;background:var(--paper2);border:1px dashed var(--taupe);border-radius:12px;padding:14px;text-align:center;overflow-wrap:anywhere;user-select:all}
 button:disabled{opacity:.5;cursor:not-allowed}
+.cust{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.crow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:6px;align-items:center}
+.crow input[type=checkbox]{width:22px;height:22px;min-height:0;accent-color:var(--sage)}
 </style>
 </head>
 <body>
@@ -192,9 +196,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 {
-const NAMES={home:'Home',wellness:'Self-Care',habits:'Habits',sleep:'Sleep',cycle:'Cycle',journal:'Journal',gratitude:'Gratitude',comfort:'Comfort Box',letters:'Future Me',verse:'Daily Verse',prayer:'Prayer Journal',reading:'Bible Reading',budget:'Budget',bills:'Bills',wishlist:'Wishlist',planner:'Planner',vision:'Vision Board',walk:'Walking',corner:'Savings & Travel',dates:'Date Jar',important:'Special Dates',memories:'Memories',backup:'Settings'};
-const GROUPS=[['Home',['home']],['Me',['wellness','habits','sleep','cycle','journal','gratitude','comfort','letters']],['Faith',['verse','prayer','reading']],['Money',['budget','bills','wishlist']],['Goals',['planner','vision','walk']],['Allen & Sheila',['corner','dates','important','memories']],['Settings',['backup']]];
-const TABS=GROUPS.flatMap(g=>g[1]).map(k=>[k,NAMES[k]]);
+const NAMES={customize:'Customize',home:'Home',wellness:'Self-Care',habits:'Habits',sleep:'Sleep',cycle:'Cycle',journal:'Journal',gratitude:'Gratitude',comfort:'Comfort Box',letters:'Future Me',verse:'Daily Verse',prayer:'Prayer Journal',reading:'Bible Reading',budget:'Budget',bills:'Bills',wishlist:'Wishlist',planner:'Planner',vision:'Vision Board',walk:'Walking',corner:'Savings & Travel',dates:'Date Jar',important:'Special Dates',memories:'Memories',backup:'Settings'};
+const GBASE=[['home','Home',['home']],['me','Me',['wellness','habits','sleep','cycle','journal','gratitude','comfort','letters']],['faith','Faith',['verse','prayer','reading']],['money','Money',['budget','bills','wishlist']],['goals','Goals',['planner','vision','walk']],['us','Allen & Sheila',['corner','dates','important','memories']],['settings','Settings',['backup','customize']]];
+const LOCKED=['home','backup','customize'];
+const UI=()=>S.ui||(S.ui={g:{},t:{},hide:[],order:{}});
+const tabName=k=>UI().t[k]||NAMES[k];
+const ordered=(key,tabs)=>{const o=UI().order[key]||[];return [...o.filter(k=>tabs.includes(k)),...tabs.filter(k=>!o.includes(k))]};
+const G=()=>GBASE.map(([key,label,tabs])=>[UI().g[key]||label,ordered(key,tabs).filter(k=>LOCKED.includes(k)||!UI().hide.includes(k)),key]).filter(g=>g[1].length);
+let GROUPS=[];
 const VERSES=[
  ['Philippians 4:6-7','Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God. And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus.'],
  ['Isaiah 41:10','Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness.'],
@@ -237,6 +246,10 @@ const IDEAS=['Sunset picnic by the bay','Cook a new recipe together','Movie mara
 const PLANS={gospels:['The four Gospels',[['Matthew',28],['Mark',16],['Luke',24],['John',21]]],nt:['New Testament',[['Matthew',28],['Mark',16],['Luke',24],['John',21],['Acts',28],['Romans',16],['1 Corinthians',16],['2 Corinthians',13],['Galatians',6],['Ephesians',6],['Philippians',4],['Colossians',4],['1 Thessalonians',5],['2 Thessalonians',3],['1 Timothy',6],['2 Timothy',4],['Titus',3],['Philemon',1],['Hebrews',13],['James',5],['1 Peter',5],['2 Peter',3],['1 John',5],['2 John',1],['3 John',1],['Jude',1],['Revelation',22]]],psalms:['Psalms',[['Psalms',150]]],proverbs:['Proverbs (31 days)',[['Proverbs',31]]]};
 const chapters=k=>PLANS[k][1].flatMap(([b,n])=>[...Array(n)].map((_,i)=>b+' '+(i+1)));
 const CKIND=['Sweet note','Photo','Song','Verse','Reminder'];
+const LDEF={exp:EXP,inc:INC,vcat:VCAT,moods:MOODS,selfcare:HABITS,ckind:CKIND};
+const LNAME={exp:'Budget expense categories',inc:'Budget income categories',vcat:'Vision Board categories',moods:'Journal moods',selfcare:'Self-Care daily checklist',ckind:'Comfort Box types'};
+const L=k=>(S.lists&&S.lists[k]&&S.lists[k].length)?S.lists[k]:LDEF[k];
+const ALLV=()=>VERSES.concat((S.myVerses||[]).map(v=>[v.ref,v.text]));
 const PRI=['Normal','Important'];
 const KEY='sheila-space-v1';
 const DEF=()=>({name:'Sheila',vision:[],tx:[],limits:{},fav:[],vnotes:{},journal:[],letters:[],checkins:{},therapy:[],gratitude:{},walks:{},walkGoal:6000,ipon:[],travel:[],theme:'auto',habits:['Drink 8 glasses of water','Take vitamins','Skincare','Sleep before 11 PM'].map((n,i)=>({id:'h'+i,name:n})),hlog:{},sleep:{},periods:[],comfort:[],prayers:[],reading:{plan:'gospels',done:{}},bills:[],wish:[],dateIdeas:IDEAS.map((t,i)=>({id:'d'+i,text:t,done:false})),dates:[],memories:[],tasks:[]});
@@ -269,7 +282,7 @@ function cycleInfo(){const p=[...S.periods].sort((a,b)=>a.start.localeCompare(b.
 const V={};
 V.home=()=>{
  const h=new Date().getHours(),g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';
- const v=VERSES[dayIdx()%VERSES.length];
+ const v=ALLV()[dayIdx()%ALLV().length];
  const days=[...Array(7)].map((_,i)=>addDays(TODAY(),i-6));
  const rows=[['Walk','f1',d=>S.walks[d]&&S.walks[d].steps>0],['Gratitude','f2',d=>S.gratitude[d]&&S.gratitude[d].some(x=>x)],['Check-in','f3',d=>!!S.checkins[d]],['Habits','f1',d=>(S.hlog[d]||[]).length>0]];
  const up=S.dates.map(x=>({...x,n:nextOcc(x.date,x.yearly)})).filter(x=>x.n>=TODAY()).sort((a,b)=>a.n.localeCompare(b.n))[0];
@@ -296,46 +309,46 @@ V.home=()=>{
   <a class="stat" href="#bills" style="text-decoration:none;color:inherit"><small>Unpaid bills this month</small><b>${peso(dueAmt)}</b><small>${due.length} ${due.length===1?'bill':'bills'}</small></a>
   <a class="stat" href="#important" style="text-decoration:none;color:inherit"><small>${up?esc(up.title):'Special dates'}</small><b>${up?(daysTo(up.n)===0?'Today!':daysTo(up.n)+' days'):'\u2014'}</b><small>${up?nice(up.n):'Add your anniversary'}</small></a>
  </div>
- ${GROUPS.slice(1).map(g=>`<h2 style="margin-top:28px">${esc(g[0])}</h2><div class="tiles">${g[1].map(k=>`<a class="tile" href="#${k}"><b>${NAMES[k]}</b><span>${TIP[k]}</span></a>`).join('')}</div>`).join('')}`};
-const TIP={vision:'Dreams you want to see every day',budget:'Income, expenses and monthly budget',verse:'One verse a day',journal:'For your thoughts and feelings',letters:'Letters you can only open on a set date',wellness:'Mood, anxiety, therapy and self-care',gratitude:'Three things you\u2019re thankful for',walk:'Steps, minutes and streaks',corner:'Our savings and travel goals',backup:'Name, theme, backup and restore',habits:'Your own daily habits and streaks',sleep:'Bedtime, wake time and sleep quality',cycle:'Period log and next-cycle prediction',comfort:'Open this on heavy days',prayer:'Prayer requests and answered prayers',reading:'Chapter-by-chapter reading plan',bills:'Monthly bills and due dates',wishlist:'Things to save up for',planner:'Daily to-do list',dates:'Date ideas and a random pick',important:'Countdowns to the days that matter',memories:'Our story, one moment at a time'};
+ ${G().slice(1).map(g=>`<h2 style="margin-top:28px">${esc(g[0])}</h2><div class="tiles">${g[1].map(k=>`<a class="tile" href="#${k}"><b>${esc(tabName(k))}</b><span>${TIP[k]}</span></a>`).join('')}</div>`).join('')}`};
+const TIP={vision:'Dreams you want to see every day',budget:'Income, expenses and monthly budget',verse:'One verse a day',journal:'For your thoughts and feelings',letters:'Letters you can only open on a set date',wellness:'Mood, anxiety, therapy and self-care',gratitude:'Three things you\u2019re thankful for',walk:'Steps, minutes and streaks',corner:'Our savings and travel goals',backup:'Name, theme, backup and restore',habits:'Your own daily habits and streaks',sleep:'Bedtime, wake time and sleep quality',cycle:'Period log and next-cycle prediction',comfort:'Open this on heavy days',prayer:'Prayer requests and answered prayers',reading:'Chapter-by-chapter reading plan',bills:'Monthly bills and due dates',wishlist:'Things to save up for',planner:'Daily to-do list',dates:'Date ideas and a random pick',important:'Countdowns to the days that matter',memories:'Our story, one moment at a time',customize:'Rename, hide and reorder pages; edit lists'};
 
 V.vision=()=>`<div class="head"><div><h1>Vision Board</h1><p>Pin the things you want to happen in your life. You can add a photo to each one.</p></div></div>
  <div class="grid" style="grid-template-columns:minmax(0,1fr)">
  <details class="card tint"${S.vision.length?'':' open'}><summary><h3 style="margin:0">Add a dream</h3></summary>
-  <form id="fVision" class="stack" style="margin-top:12px"><div class="row"><div><label for="vT">Dream</label><input id="vT" required placeholder="e.g. A home with a garden"></div><div><label for="vC">Category</label><select id="vC">${opts(VCAT)}</select></div></div>
+  <form id="fVision" class="stack" style="margin-top:12px"><div class="row"><div><label for="vT">Dream</label><input id="vT" required placeholder="e.g. A home with a garden"></div><div><label for="vC">Category</label><select id="vC">${opts(L('vcat'))}</select></div></div>
   <div><label for="vN">Why does this matter to you?</label><input id="vN"></div><div><label for="vI">Photo (optional)</label><input id="vI" type="file" accept="image/*"></div><button>Add to board</button></form></details></div>
- <div style="margin-top:16px">${S.vision.length?`<div class="board">${S.vision.map(x=>`<div class="vc${x.done?' done':''}">${x.img?`<img src="${esc(x.img)}" alt="">`:`<div class="ph" style="background:${x.done?'var(--sageBg)':'var(--roseBg)'}">${esc(x.title)}</div>`}<div class="in stack"><div class="btns" style="justify-content:space-between;align-items:center"><span class="chip${x.done?' g':''}">${x.done?'Achieved':esc(x.cat)}</span><span><button class="sm ghost" data-a="vdone" data-id="${x.id}">${x.done?'Undo':'Achieved!'}</button><button class="sm del" data-a="vdel" data-id="${x.id}">Delete</button></span></div>${x.img?`<b>${esc(x.title)}</b>`:''}${x.note?`<p class="muted">${esc(x.note)}</p>`:''}</div></div>`).join('')}</div>`:'<p class="empty">Your board is empty. Start with one dream.</p>'}</div>`;
+ <div style="margin-top:16px">${S.vision.length?`<div class="board">${S.vision.map(x=>`<div class="vc${x.done?' done':''}">${x.img?`<img src="${esc(x.img)}" alt="">`:`<div class="ph" style="background:${x.done?'var(--sageBg)':'var(--roseBg)'}">${esc(x.title)}</div>`}<div class="in stack"><div class="btns" style="justify-content:space-between;align-items:center"><span class="chip${x.done?' g':''}">${x.done?'Achieved':esc(x.cat)}</span><span><button class="sm ghost" data-a="vdone" data-id="${x.id}">${x.done?'Undo':'Achieved!'}</button><button class="sm ghost" data-a="edit" data-k="vision" data-id="${x.id}">Edit</button><button class="sm del" data-a="vdel" data-id="${x.id}">Delete</button></span></div>${x.img?`<b>${esc(x.title)}</b>`:''}${x.note?`<p class="muted">${esc(x.note)}</p>`:''}</div></div>`).join('')}</div>`:'<p class="empty">Your board is empty. Start with one dream.</p>'}</div>`;
 
 V.budget=()=>{
  const mt=S.tx.filter(t=>t.date.startsWith(bMonth)).sort((a,b)=>b.date.localeCompare(a.date));
  const inc=mt.filter(t=>t.type==='in').reduce((a,t)=>a+t.amt,0),out=mt.filter(t=>t.type==='out').reduce((a,t)=>a+t.amt,0);
  const lim=S.limits[bMonth]||0,pct=lim?Math.min(100,out/lim*100):0;
- const cats=EXP.map(c=>[c,mt.filter(t=>t.type==='out'&&t.cat===c).reduce((a,t)=>a+t.amt,0)]).filter(c=>c[1]>0).sort((a,b)=>b[1]-a[1]);
+ const cats=L('exp').map(c=>[c,mt.filter(t=>t.type==='out'&&t.cat===c).reduce((a,t)=>a+t.amt,0)]).filter(c=>c[1]>0).sort((a,b)=>b[1]-a[1]);
  const mx=cats.length?cats[0][1]:1;
  return `<div class="head"><div><h1>Budget Tracker</h1><p>Every peso in and out, month by month.</p></div><div style="width:190px"><label for="bM">Month</label><input id="bM" type="month" value="${bMonth}"></div></div>
  <div class="stats" style="margin-bottom:16px"><div class="stat"><small>Income</small><b class="pos">${peso(inc)}</b></div><div class="stat"><small>Expenses</small><b class="neg">${peso(out)}</b></div><div class="stat"><small>Balance</small><b>${peso(inc-out)}</b></div>
  <div class="stat"><small>${lim?'Budget: '+peso(lim):'No budget limit yet'}</small><div class="bar" style="margin:12px 0 6px"><i style="width:${pct}%"></i></div><small>${lim?(out>lim?peso(out-lim)+' over budget':peso(lim-out)+' left to spend'):'Set one below'}</small></div></div>
  <div class="grid">
   <div class="card stack"><h3>New transaction</h3><form id="fTx" class="stack"><div class="row"><div><label for="tT">Type</label><select id="tT"><option value="out">Expense</option><option value="in">Income</option></select></div><div><label for="tA">Amount (₱)</label><input id="tA" type="number" min="0" step="0.01" inputmode="decimal" required></div></div>
-  <div class="row"><div><label for="tC">Category</label><select id="tC">${opts(EXP)}</select></div><div><label for="tD">Date</label><input id="tD" type="date" value="${TODAY()}" required></div></div><div><label for="tN">Note</label><input id="tN" placeholder="e.g. Grab ride home"></div><button>Save</button></form>
+  <div class="row"><div><label for="tC">Category</label><select id="tC">${opts(L('exp'))}</select></div><div><label for="tD">Date</label><input id="tD" type="date" value="${TODAY()}" required></div></div><div><label for="tN">Note</label><input id="tN" placeholder="e.g. Grab ride home"></div><button>Save</button></form>
   <form id="fLim" class="row" style="align-items:end;border-top:1px solid var(--line);padding-top:12px"><div><label for="lA">Budget limit this month</label><input id="lA" type="number" min="0" inputmode="decimal" value="${lim||''}"></div><button class="ghost">Set</button></form></div>
   <div class="card"><h3>Where the money goes</h3>${cats.length?cats.map(c=>`<div style="margin-bottom:10px"><div class="btns" style="justify-content:space-between"><span>${esc(c[0])}</span><span class="num">${peso(c[1])}</span></div><div class="bar"><i style="width:${c[1]/mx*100}%"></i></div></div>`).join(''):'<p class="empty">No expenses this month yet.</p>'}</div>
-  <div class="card"><h3>Transactions</h3>${mt.length?`<ul class="list">${mt.map(t=>`<li><div><b>${esc(t.cat)}</b>${t.note?` <span class="muted">· ${esc(t.note)}</span>`:''}<div class="muted">${nice(t.date)}</div></div><div style="display:flex;align-items:center;gap:4px"><span class="num ${t.type==='in'?'pos':'neg'}">${t.type==='in'?'+':'−'}${peso(t.amt)}</span><button class="sm del" data-a="txdel" data-id="${t.id}" aria-label="Delete">×</button></div></li>`).join('')}</ul>`:'<p class="empty">No transactions yet.</p>'}</div>
+  <div class="card"><h3>Transactions</h3>${mt.length?`<ul class="list">${mt.map(t=>`<li><div><b>${esc(t.cat)}</b>${t.note?` <span class="muted">· ${esc(t.note)}</span>`:''}<div class="muted">${nice(t.date)}</div></div><div style="display:flex;align-items:center;gap:4px"><span class="num ${t.type==='in'?'pos':'neg'}">${t.type==='in'?'+':'−'}${peso(t.amt)}</span><button class="sm ghost" data-a="edit" data-k="tx" data-id="${t.id}">Edit</button><button class="sm del" data-a="txdel" data-id="${t.id}" aria-label="Delete">×</button></div></li>`).join('')}</ul>`:'<p class="empty">No transactions yet.</p>'}</div>
  </div>`};
 
 V.verse=()=>{
- const i=((dayIdx()+vOff)%VERSES.length+VERSES.length)%VERSES.length,v=VERSES[i],d=addDays(TODAY(),vOff),isFav=S.fav.includes(i);
+ const i=((dayIdx()+vOff)%ALLV().length+ALLV().length)%ALLV().length,v=ALLV()[i],d=addDays(TODAY(),vOff),isFav=S.fav.includes(i);
  return `<div class="head"><div><h1>Daily Bible Verse</h1><p>${vOff===0?'Your verse for today':nice(d)}</p></div></div>
  <div class="grid"><div class="verse" style="min-height:260px"><div class="ref">${esc(v[0])} · King James Version</div><q>${esc(v[1])}</q>
  <div class="btns"><button class="ghost sm" style="color:inherit;border-color:currentColor" data-a="vprev">Previous</button><button class="ghost sm" style="color:inherit;border-color:currentColor" data-a="vnext">Next</button><button class="sm" style="background:var(--bg);color:var(--ink);border-color:var(--bg)" data-a="vfav" data-id="${i}">${isFav?'Saved':'Save'}</button><button class="ghost sm" style="color:inherit;border-color:currentColor" data-a="vcopy" data-id="${i}">Copy</button></div></div>
  <div class="card stack"><h3>Reflection</h3><label for="vr">What is this verse saying to you today?</label><textarea id="vr">${esc(S.vnotes[d]||'')}</textarea><button data-a="vnote" data-id="${d}">Save reflection</button></div>
- <div class="card"><h3>Saved verses</h3>${S.fav.length?`<ul class="list">${S.fav.map(f=>`<li><div><b>${esc(VERSES[f][0])}</b><p class="muted">${esc(VERSES[f][1])}</p></div><button class="sm del" data-a="vunfav" data-id="${f}">×</button></li>`).join('')}</ul>`:'<p class="empty">Tap Save on any verse you want to come back to.</p>'}</div></div>`};
+ <div class="card"><h3>Saved verses</h3>${S.fav.length?`<ul class="list">${S.fav.filter(f=>ALLV()[f]).map(f=>`<li><div><b>${esc((ALLV()[f]||['',''])[0])}</b><p class="muted">${esc((ALLV()[f]||['',''])[1])}</p></div><button class="sm del" data-a="vunfav" data-id="${f}">×</button></li>`).join('')}</ul>`:'<p class="empty">Tap Save on any verse you want to come back to.</p>'}</div></div>`};
 
 V.journal=()=>{
  const q=jq.toLowerCase(),list=S.journal.filter(j=>!q||(j.title+' '+j.body).toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date));
  const e=openJ?S.journal.find(j=>j.id===openJ):null;
  return `<div class="head"><div><h1>Journal</h1><p>A safe place for your thoughts. It stays on this device only.</p></div></div>
- <div class="grid"><form id="fJ" class="card stack"><h3>${e?'Edit entry':'New entry'}</h3><div class="row"><div><label for="jD">Date</label><input id="jD" type="date" value="${e?e.date:TODAY()}"></div><div><label for="jM">Feeling</label><select id="jM">${opts(MOODS,e&&e.mood)}</select></div></div>
+ <div class="grid"><form id="fJ" class="card stack"><h3>${e?'Edit entry':'New entry'}</h3><div class="row"><div><label for="jD">Date</label><input id="jD" type="date" value="${e?e.date:TODAY()}"></div><div><label for="jM">Feeling</label><select id="jM">${opts(L('moods'),e&&e.mood)}</select></div></div>
  <div><label for="jT">Title</label><input id="jT" value="${esc(e?e.title:'')}"></div><div><label for="jB">Just write</label><textarea id="jB" style="min-height:200px" required>${esc(e?e.body:'')}</textarea></div><div class="btns"><button>${e?'Update':'Save'}</button>${e?'<button type="button" class="ghost" data-a="jcancel">Cancel</button>':''}</div></form>
  <div class="card"><h3>Entries</h3><label for="jS">Search</label><input id="jS" value="${esc(jq)}" placeholder="Word or title">
  ${list.length?`<ul class="list" style="margin-top:8px">${list.map(j=>`<li><details style="flex:1"><summary><div><b>${esc(j.title||'Untitled')}</b><div class="muted">${nice(j.date)} · ${esc(j.mood)}</div></div></summary><p style="white-space:pre-wrap;margin-top:8px">${esc(j.body)}</p><div class="btns" style="margin-top:8px"><button class="sm ghost" data-a="jedit" data-id="${j.id}">Edit</button><button class="sm del" data-a="jdel" data-id="${j.id}">Delete</button></div></details></li>`).join('')}</ul>`:`<p class="empty" style="margin-top:12px">${q?'No matches.':'No entries yet. Write your first page.'}</p>`}</div></div>`};
@@ -344,7 +357,7 @@ V.letters=()=>{
  const t=TODAY(),L=[...S.letters].sort((a,b)=>a.open.localeCompare(b.open));
  return `<div class="head"><div><h1>Letters to Future Me</h1><p>Write to your future self. Each letter stays sealed until the date you choose.</p></div></div>
  <div class="grid"><form id="fL" class="card stack"><h3>New letter</h3><div><label for="lS">Subject</label><input id="lS" required placeholder="e.g. For me on my 30th birthday"></div><div><label for="lD">Open on</label><input id="lD" type="date" min="${addDays(t,1)}" value="${addDays(t,365)}" required></div><div><label for="lB">Dear future me,</label><textarea id="lB" style="min-height:200px" required></textarea></div><button>Seal the letter</button></form>
- <div class="stack">${L.length?L.map(l=>{const open=l.open<=t,days=Math.round((parse(l.open)-parse(t))/864e5);return open?`<div class="card stack"><div class="btns" style="justify-content:space-between"><span class="chip g">Opened</span><span class="muted">Written ${nice(l.made)}</span></div><h3>${esc(l.subject)}</h3><p style="white-space:pre-wrap">Dear future me,\n\n${esc(l.body)}</p><button class="sm del" data-a="ldel" data-id="${l.id}">Delete</button></div>`:`<div class="card sealed stack"><div class="btns" style="justify-content:space-between"><span class="chip n">Sealed</span><span class="muted">Written ${nice(l.made)}</span></div><h3>${esc(l.subject)}</h3><p><span class="big">${days}</span> ${days===1?'day':'days'} until you can read it · ${nice(l.open)}</p></div>`}).join(''):'<p class="empty">No letters yet. What would you like to tell yourself a year from now?</p>'}</div></div>`};
+ <div class="stack">${L.length?L.map(l=>{const open=l.open<=t,days=Math.round((parse(l.open)-parse(t))/864e5);return open?`<div class="card stack"><div class="btns" style="justify-content:space-between"><span class="chip g">Opened</span><span class="muted">Written ${nice(l.made)}</span></div><h3>${esc(l.subject)}</h3><p style="white-space:pre-wrap">Dear future me,\n\n${esc(l.body)}</p><button class="sm ghost" data-a="edit" data-k="letters" data-id="${l.id}">Edit</button><button class="sm del" data-a="ldel" data-id="${l.id}">Delete</button></div>`:`<div class="card sealed stack"><div class="btns" style="justify-content:space-between"><span class="chip n">Sealed</span><span class="muted">Written ${nice(l.made)}</span></div><h3>${esc(l.subject)}</h3><p><span class="big">${days}</span> ${days===1?'day':'days'} until you can read it · ${nice(l.open)}</p></div>`}).join(''):'<p class="empty">No letters yet. What would you like to tell yourself a year from now?</p>'}</div></div>`};
 
 V.wellness=()=>{
  const t=TODAY(),c=S.checkins[t]||{mood:5,anx:5,sleep:'',habits:[],note:''};
@@ -354,13 +367,13 @@ V.wellness=()=>{
   <div><label for="cM">Mood: <b id="cMv">${c.mood}</b>/10 <span class="muted">(1 heavy, 10 light)</span></label><input id="cM" type="range" min="1" max="10" value="${c.mood}"></div>
   <div><label for="cA">Anxiety: <b id="cAv">${c.anx}</b>/10 <span class="muted">(1 calm, 10 overwhelming)</span></label><input id="cA" type="range" min="1" max="10" value="${c.anx}"></div>
   <div><label for="cS">Hours of sleep last night</label><input id="cS" type="number" min="0" max="24" step="0.5" inputmode="decimal" value="${esc(c.sleep)}"></div>
-  <div class="checks"><label style="color:var(--soft)">What I did for myself today</label>${HABITS.map((h,i)=>`<label><input type="checkbox" id="h${i}"${c.habits.includes(i)?' checked':''}>${h}</label>`).join('')}</div>
+  <div class="checks"><label style="color:var(--soft)">What I did for myself today</label>${L('selfcare').map((h,i)=>`<label><input type="checkbox" id="h${i}"${c.habits.includes(h)||c.habits.includes(HABITS.indexOf(h))?' checked':''}>${esc(h)}</label>`).join('')}</div>
   <div><label for="cN">What triggered you or helped you today?</label><textarea id="cN">${esc(c.note)}</textarea></div><button>Save check-in</button></form>
  <div class="stack"><div class="card"><h3>Last 14 days</h3><p class="muted"><span style="color:var(--sage)">●</span> Mood &nbsp; <span style="color:var(--rose)">●</span> Anxiety</p><div class="fig" id="mf"><svg id="ms"></svg></div></div>
  <div class="card stack"><h3>Box breathing</h3><p class="muted">Breathe in for 4, hold for 4, out for 4, hold for 4. Repeat until you feel lighter.</p><div class="breath"><div class="circ" id="circ">Start</div></div><button class="ghost" data-a="breath">Start / stop</button>
  <details><summary><b>5-4-3-2-1 grounding</b></summary><p style="margin-top:6px">Notice 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell and 1 you can taste. It brings your mind back to the present.</p></details></div></div>
  <div class="card stack"><h3>Therapy notes</h3><form id="fTh" class="stack"><div class="row"><div><label for="thD">Session date</label><input id="thD" type="date" value="${t}"></div><div><label for="thW">With whom / where</label><input id="thW"></div></div><div><label for="thN">What I learned</label><textarea id="thN" required></textarea></div><div><label for="thH">Homework or next steps</label><input id="thH"></div><button>Save session</button></form>
- ${S.therapy.length?`<ul class="list">${[...S.therapy].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`<li><div><b>${nice(s.date)}</b>${s.who?` <span class="muted">· ${esc(s.who)}</span>`:''}<p style="white-space:pre-wrap">${esc(s.notes)}</p>${s.hw?`<p class="muted">Homework: ${esc(s.hw)}</p>`:''}</div><button class="sm del" data-a="thdel" data-id="${s.id}">×</button></li>`).join('')}</ul>`:''}</div>
+ ${S.therapy.length?`<ul class="list">${[...S.therapy].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`<li><div><b>${nice(s.date)}</b>${s.who?` <span class="muted">· ${esc(s.who)}</span>`:''}<p style="white-space:pre-wrap">${esc(s.notes)}</p>${s.hw?`<p class="muted">Homework: ${esc(s.hw)}</p>`:''}</div><button class="sm ghost" data-a="edit" data-k="therapy" data-id="${s.id}">Edit</button><button class="sm del" data-a="thdel" data-id="${s.id}">×</button></li>`).join('')}</ul>`:''}</div>
  <div class="help stack"><h3>If it gets too heavy</h3><p>You don\u2019t have to go through it alone. Call the NCMH Crisis Hotline, free and open 24/7: <b>1553</b> (landline), <b>0919-057-1553</b> (Smart/TNT), <b>0917-899-8727</b> o <b>0966-351-4518</b> (Globe/TM). You can also call someone you love and trust.</p></div>
  </div>`};
 
@@ -369,7 +382,7 @@ V.gratitude=()=>{
  const days=Object.keys(S.gratitude).filter(d=>d!==t&&S.gratitude[d].some(x=>x)).sort().reverse();
  return `<div class="head"><div><h1>Gratitude Journal</h1><p>Three things you\u2019re thankful for today, no matter how small.</p></div><div class="stat"><small>Streak</small><b>${st} ${st===1?'day':'days'}</b></div></div>
  <div class="grid"><form id="fG" class="card stack"><h3>${nice(t)}</h3>${[0,1,2].map(i=>`<div><label for="g${i}">${i+1}. Thank you, Lord, for…</label><input id="g${i}" value="${esc(g[i])}"></div>`).join('')}<button>Save</button></form>
- <div class="card"><h3>Past days</h3>${days.length?`<ul class="list">${days.map(d=>`<li><div><b>${nice(d)}</b><ul style="margin:4px 0 0;padding-left:18px">${S.gratitude[d].filter(x=>x).map(x=>`<li style="display:list-item;border:0;padding:2px 0">${esc(x)}</li>`).join('')}</ul></div></li>`).join('')}</ul>`:'<p class="empty">What you wrote on past days will appear here.</p>'}</div></div>`};
+ <div class="card"><h3>Past days</h3>${days.length?`<ul class="list">${days.map(d=>`<li><div style="flex:1"><b>${nice(d)}</b><ul style="margin:4px 0 0;padding-left:18px">${S.gratitude[d].filter(x=>x).map(x=>`<li style="display:list-item;border:0;padding:2px 0">${esc(x)}</li>`).join('')}</ul></div><button class="sm ghost" data-a="edit" data-k="gratitude" data-id="${d}">Edit</button></li>`).join('')}</ul>`:'<p class="empty">What you wrote on past days will appear here.</p>'}</div></div>`};
 
 V.walk=()=>{
  const t=TODAY(),w=S.walks[t]||{steps:'',mins:'',km:''},days=[...Array(7)].map((_,i)=>addDays(t,i-6));
@@ -388,11 +401,11 @@ V.corner=()=>{
  return `<div class="head"><div><h1>Allen &amp; Sheila Corner</h1><p>For what we\u2019re saving for and where we\u2019ll go together.</p></div><div class="stat"><small>Places we\u2019ve been</small><b>${vis} ${vis===1?'place':'places'}</b></div></div>
  <div class="grid">
  <div class="stack"><h2>Savings goals</h2>
-  ${S.ipon.map(g=>{const p=g.target?Math.min(100,g.saved/g.target*100):0;return `<div class="card stack"><div class="btns" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">${esc(g.name)}</h3><button class="sm del" data-a="idel" data-id="${g.id}">Delete</button></div><p><span class="big">${peso(g.saved)}</span> <span class="muted">of ${peso(g.target)}${g.by?' · by '+nice(g.by):''}</span></p><div class="bar g"><i style="width:${p}%"></i></div><p class="muted">${Math.round(p)}%${g.saved<g.target?' · '+peso(g.target-g.saved)+' to go':' · Goal reached!'}</p>
+  ${S.ipon.map(g=>{const p=g.target?Math.min(100,g.saved/g.target*100):0;return `<div class="card stack"><div class="btns" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">${esc(g.name)}</h3><button class="sm ghost" data-a="edit" data-k="ipon" data-id="${g.id}">Edit</button><button class="sm del" data-a="idel" data-id="${g.id}">Delete</button></div><p><span class="big">${peso(g.saved)}</span> <span class="muted">of ${peso(g.target)}${g.by?' · by '+nice(g.by):''}</span></p><div class="bar g"><i style="width:${p}%"></i></div><p class="muted">${Math.round(p)}%${g.saved<g.target?' · '+peso(g.target-g.saved)+' to go':' · Goal reached!'}</p>
   <div class="row" style="align-items:end"><div><label for="d${g.id}">Add or withdraw</label><input id="d${g.id}" type="number" step="0.01" inputmode="decimal" placeholder="e.g. 500 or -200"></div><button class="ghost" data-a="idep" data-id="${g.id}">Add</button></div></div>`}).join('')||'<p class="empty">No savings goals yet.</p>'}
   <form id="fI" class="card tint stack"><h3>New savings goal</h3><div><label for="iN">Saving for</label><input id="iN" required placeholder="e.g. Emergency fund, Japan trip"></div><div class="row"><div><label for="iT">Target (₱)</label><input id="iT" type="number" min="1" inputmode="decimal" required></div><div><label for="iB">Target date</label><input id="iB" type="date"></div></div><button>Add goal</button></form></div>
  <div class="stack"><h2>Travel goals</h2>
-  ${S.travel.length?S.travel.map(x=>`<div class="card stack"><div class="btns" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">${esc(x.place)}</h3><span class="chip${x.status==='Visited'?' g':x.status==='Dream'?' n':''}">${esc(x.status)}</span></div><p class="muted">${x.when?'Target: '+nice(x.when):'No date yet'}${x.cost?' · Budget '+peso(x.cost):''}</p>${x.note?`<p>${esc(x.note)}</p>`:''}<div class="row" style="align-items:end"><div><label for="s${x.id}">Status</label><select id="s${x.id}" data-a="tstat" data-id="${x.id}">${opts(TSTAT,x.status)}</select></div><button class="del" data-a="tdel" data-id="${x.id}">Delete</button></div></div>`).join(''):'<p class="empty">Where do we want to go?</p>'}
+  ${S.travel.length?S.travel.map(x=>`<div class="card stack"><div class="btns" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">${esc(x.place)}</h3><span class="chip${x.status==='Visited'?' g':x.status==='Dream'?' n':''}">${esc(x.status)}</span></div><p class="muted">${x.when?'Target: '+nice(x.when):'No date yet'}${x.cost?' · Budget '+peso(x.cost):''}</p>${x.note?`<p>${esc(x.note)}</p>`:''}<div class="row" style="align-items:end"><div><label for="s${x.id}">Status</label><select id="s${x.id}" data-a="tstat" data-id="${x.id}">${opts(TSTAT,x.status)}</select></div><button class="ghost sm" data-a="edit" data-k="travel" data-id="${x.id}">Edit</button><button class="del" data-a="tdel" data-id="${x.id}">Delete</button></div></div>`).join(''):'<p class="empty">Where do we want to go?</p>'}
   <form id="fTr" class="card tint stack"><h3>New destination</h3><div><label for="trP">Place</label><input id="trP" required placeholder="e.g. Batanes, Seoul"></div><div class="row"><div><label for="trW">When</label><input id="trW" type="date"></div><div><label for="trC">Estimated budget (₱)</label><input id="trC" type="number" min="0" inputmode="decimal"></div></div><div><label for="trN">What we want to do there</label><input id="trN"></div><button>Add destination</button></form></div>
  </div>`};
 
@@ -406,11 +419,27 @@ V.backup=()=>`<div class="head"><div><h1>Settings</h1><p>Your entries are encryp
  <form id="fRes" class="card stack"><h3>Import</h3><p class="muted">Paste an exported copy or choose a file. This replaces the entries in your account.</p><div><label for="rT">Exported text</label><textarea id="rT"></textarea></div><div><label for="rF">Or choose a file</label><input id="rF" type="file" accept=".json,.txt,application/json,text/plain"></div><button>Import</button></form>
  <div class="card stack"><h3>Delete all entries</h3><p class="muted">Export a copy first if you might want them later.</p><button class="ghost" style="color:var(--rose)" data-a="wipe">Delete all my entries</button></div></div>`;
 
+
+V.customize=()=>{const u=UI();
+ return `<div class="head"><div><h1>Customize</h1><p>Make the app yours: rename, hide and reorder pages, and change the lists the app uses.</p></div></div>
+ <div class="grid">
+ <form id="fUi" class="card stack"><h3>Sections and pages</h3><p class="muted">Rename anything. Untick a page to hide it. Use the arrows to reorder. Home, Settings and Customize always stay.</p>
+ ${GBASE.filter(g=>g[0]!=='home').map(([key,label,tabs])=>`<div class="cust"><div><label for="g_${key}">Section name</label><input id="g_${key}" value="${esc(u.g[key]||label)}"></div>
+ ${ordered(key,tabs).map((k,i,arr)=>`<div class="crow"><input type="checkbox" id="v_${k}" aria-label="Show ${esc(NAMES[k])}"${LOCKED.includes(k)?' checked disabled':u.hide.includes(k)?'':' checked'}><input id="t_${k}" value="${esc(tabName(k))}" aria-label="Name for ${esc(NAMES[k])}"><button type="button" class="sm ghost" data-a="mv" data-g="${key}" data-id="${k}" data-d="-1"${i===0?' disabled':''} aria-label="Move up">↑</button><button type="button" class="sm ghost" data-a="mv" data-g="${key}" data-id="${k}" data-d="1"${i===arr.length-1?' disabled':''} aria-label="Move down">↓</button></div>`).join('')}</div>`).join('')}
+ <div class="btns"><button>Save</button><button type="button" class="ghost" data-a="uireset">Reset to default</button></div></form>
+ <div class="stack">
+ <form id="fLists" class="card stack"><h3>Lists</h3><p class="muted">One item per line. Leave a list empty to go back to the default.</p>
+ ${Object.keys(LDEF).map(k=>`<div><label for="l_${k}">${LNAME[k]}</label><textarea id="l_${k}" rows="5">${esc(L(k).join('\n'))}</textarea></div>`).join('')}<button>Save lists</button></form>
+ <div class="card stack"><h3>My Bible verses</h3><p class="muted">Add your own favorite verses. They join the daily verse rotation.</p>
+ <form id="fMv" class="stack"><div><label for="mvR">Reference</label><input id="mvR" required placeholder="e.g. Psalm 91:1"></div><div><label for="mvT">Verse</label><textarea id="mvT" required></textarea></div><button>Add verse</button></form>
+ ${(S.myVerses||[]).length?`<ul class="list">${S.myVerses.map(v=>`<li><div><b>${esc(v.ref)}</b><p class="muted">${esc(v.text)}</p></div><span style="display:flex"><button class="sm ghost" data-a="edit" data-k="myVerses" data-id="${v.id}">Edit</button><button class="sm del" data-a="mvdel" data-id="${v.id}" aria-label="Delete">×</button></span></li>`).join('')}</ul>`:''}</div>
+ </div></div>`};
+
 V.habits=()=>{
  const t=TODAY(),days=[...Array(7)].map((_,i)=>addDays(t,i-6)),done=(S.hlog[t]||[]).filter(id=>S.habits.some(h=>h.id===id)).length;
  return `<div class="head"><div><h1>Habit Tracker</h1><p>Tap a square to mark a habit done for that day.</p></div><div class="stat"><small>Today</small><b>${done}/${S.habits.length}</b></div></div>
  <div class="card">${S.habits.length?`<div class="hgrid"><span class="hn0"></span>${days.map(d=>`<span class="d"${d===t?' style="color:var(--ink);font-weight:700"':''}>${parse(d).toLocaleDateString('en-PH',{weekday:'narrow'})}<br>${parse(d).getDate()}</span>`).join('')}<span class="d">Streak</span>
- ${S.habits.map(h=>`<span class="hn" style="display:flex;align-items:center;justify-content:space-between;gap:4px">${esc(h.name)}<button class="sm del" data-a="hdel" data-id="${h.id}" aria-label="Delete habit">×</button></span>${days.map(d=>`<button class="hc${(S.hlog[d]||[]).includes(h.id)?' on':''}" data-a="htog" data-id="${h.id}" data-d="${d}" aria-label="${esc(h.name)} on ${nice(d)}"></button>`).join('')}<span class="num">${streak(d=>(S.hlog[d]||[]).includes(h.id))}</span>`).join('')}</div>`:'<p class="empty">Add your first habit below.</p>'}</div>
+ ${S.habits.map(h=>`<span class="hn" style="display:flex;align-items:center;justify-content:space-between;gap:4px">${esc(h.name)}<button class="sm ghost" data-a="edit" data-k="habits" data-id="${h.id}">Edit</button><button class="sm del" data-a="hdel" data-id="${h.id}" aria-label="Delete habit">×</button></span>${days.map(d=>`<button class="hc${(S.hlog[d]||[]).includes(h.id)?' on':''}" data-a="htog" data-id="${h.id}" data-d="${d}" aria-label="${esc(h.name)} on ${nice(d)}"></button>`).join('')}<span class="num">${streak(d=>(S.hlog[d]||[]).includes(h.id))}</span>`).join('')}</div>`:'<p class="empty">Add your first habit below.</p>'}</div>
  <form id="fH" class="card tint row" style="align-items:end;margin-top:16px"><div><label for="hN">New habit</label><input id="hN" required placeholder="e.g. Read 10 pages"></div><button>Add habit</button></form>`};
 
 const QUAL=['Restless','Light','Okay','Good','Great'];
@@ -423,7 +452,7 @@ V.sleep=()=>{
  <div class="stats" style="margin-bottom:16px"><div class="stat"><small>Last night</small><b>${last?hrs(last.bed,last.wake).toFixed(1)+' h':'—'}</b></div><div class="stat"><small>7-day average</small><b>${avg?avg.toFixed(1)+' h':'—'}</b></div><div class="stat"><small>Average quality</small><b>${aq?QUAL[Math.round(aq)-1]:'—'}</b></div></div>
  <div class="grid"><form id="fSl" class="card stack"><h3>Log a night</h3><div><label for="slD">Woke up on</label><input id="slD" type="date" value="${t}"></div><div class="row"><div><label for="slB">Bedtime</label><input id="slB" type="time" value="${last?last.bed:'23:00'}" required></div><div><label for="slW">Wake time</label><input id="slW" type="time" value="${last?last.wake:'07:00'}" required></div></div><div><label for="slQ">How did you sleep?</label><select id="slQ">${QUAL.map((q,i)=>`<option value="${i+1}"${(last?last.q:3)===i+1?' selected':''}>${q}</option>`).join('')}</select></div><button>Save</button></form>
  <div class="card"><h3>Last 7 nights</h3>${days.map(d=>{const x=S.sleep[d],h=x?hrs(x.bed,x.wake):0;return `<div style="display:grid;grid-template-columns:3.2em minmax(0,1fr) 3.4em;gap:10px;align-items:center;margin:10px 0"><span class="muted">${parse(d).toLocaleDateString('en-PH',{weekday:'short'})}</span><div class="bar${h>=7&&h<=9?' g':''}" style="height:16px"><i style="width:${Math.min(100,h/10*100)}%"></i></div><span class="num">${x?h.toFixed(1)+' h':'—'}</span></div>`}).join('')}<p class="muted">Green means 7 to 9 hours.</p></div>
- <div class="card"><h3>History</h3>${list.length?`<ul class="list">${list.map(d=>{const x=S.sleep[d];return `<li><div><b>${nice(d)}</b><div class="muted">${x.bed} to ${x.wake} · ${QUAL[x.q-1]}</div></div><div style="display:flex;align-items:center;gap:4px"><span class="num">${hrs(x.bed,x.wake).toFixed(1)} h</span><button class="sm del" data-a="sldel" data-id="${d}" aria-label="Delete">×</button></div></li>`}).join('')}</ul>`:'<p class="empty">No nights logged yet.</p>'}</div></div>`};
+ <div class="card"><h3>History</h3>${list.length?`<ul class="list">${list.map(d=>{const x=S.sleep[d];return `<li><div><b>${nice(d)}</b><div class="muted">${x.bed} to ${x.wake} · ${QUAL[x.q-1]}</div></div><div style="display:flex;align-items:center;gap:4px"><span class="num">${hrs(x.bed,x.wake).toFixed(1)} h</span><button class="sm ghost" data-a="edit" data-k="sleep" data-id="${d}">Edit</button><button class="sm del" data-a="sldel" data-id="${d}" aria-label="Delete">×</button></div></li>`}).join('')}</ul>`:'<p class="empty">No nights logged yet.</p>'}</div></div>`};
 
 V.cycle=()=>{
  const c=cycleInfo(),t=TODAY(),list=[...S.periods].sort((a,b)=>b.start.localeCompare(a.start));
@@ -432,22 +461,22 @@ V.cycle=()=>{
  return `<div class="head"><div><h1>Cycle Tracker</h1><p>Log when your period starts and ends. Predictions get better the more you log.</p></div></div>
  <div class="grid"><div class="card stack" style="text-align:center">${c?ring+`<p>${msg}</p><p class="muted">Average cycle ${c.avg} days · average period ${c.plen} days</p>${!c.last.end&&c.day<=10?`<button data-a="cyend" data-id="${c.last.id}">My period ended today</button>`:''}`:'<p class="empty">Log your last period to see predictions.</p>'}<p class="muted" style="font-size:13px">Estimates only. Not reliable for preventing pregnancy.</p></div>
  <form id="fCy" class="card stack"><h3>Log a period</h3><div class="row"><div><label for="cyS">Start date</label><input id="cyS" type="date" value="${t}" max="${t}" required></div><div><label for="cyE">End date (optional)</label><input id="cyE" type="date" max="${t}"></div></div><button>Save</button></form>
- <div class="card"><h3>History</h3>${list.length?`<ul class="list">${list.map(p=>`<li><div><b>${nice(p.start)}</b><div class="muted">${p.end?'to '+nice(p.end)+' · '+(daysTo(p.end)-daysTo(p.start)+1)+' days':'Ongoing or end not logged'}</div></div><button class="sm del" data-a="cydel" data-id="${p.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:'<p class="empty">No periods logged yet.</p>'}</div></div>`};
+ <div class="card"><h3>History</h3>${list.length?`<ul class="list">${list.map(p=>`<li><div><b>${nice(p.start)}</b><div class="muted">${p.end?'to '+nice(p.end)+' · '+(daysTo(p.end)-daysTo(p.start)+1)+' days':'Ongoing or end not logged'}</div></div><button class="sm ghost" data-a="edit" data-k="periods" data-id="${p.id}">Edit</button><button class="sm del" data-a="cydel" data-id="${p.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:'<p class="empty">No periods logged yet.</p>'}</div></div>`};
 
 const itemBody=x=>`${x.img?`<img src="${esc(x.img)}" alt="" style="display:block;max-width:100%;border-radius:14px">`:''}${x.text?`<p style="white-space:pre-wrap">${esc(x.text)}</p>`:''}${safeUrl(x.link)?`<a href="${esc(safeUrl(x.link))}" target="_blank" rel="noopener">Open link</a>`:''}${x.from?`<p class="muted">From ${esc(x.from)}</p>`:''}`;
 V.comfort=()=>{
  const p=S.comfort.find(x=>x.id===cPick);
  return `<div class="head"><div><h1>Comfort Box</h1><p>Sweet messages, photos, songs and verses to open on heavy days.</p></div></div>
  <div class="grid"><div class="jar">${p?`<span class="chip" style="align-self:flex-start">${esc(p.kind)}</span>${p.img?`<img src="${esc(p.img)}" alt="" style="max-width:100%;border-radius:14px">`:''}${p.text?`<p class="big2">${esc(p.text)}</p>`:''}${safeUrl(p.link)?`<a href="${esc(safeUrl(p.link))}" target="_blank" rel="noopener" style="color:inherit">Open link</a>`:''}${p.from?`<p style="opacity:.8">From ${esc(p.from)}</p>`:''}`:`<p class="big2">${S.comfort.length?'Need a little comfort right now?':'Your comfort box is empty for now.'}</p>`}<button style="align-self:flex-start;background:var(--bg);color:var(--ink);border-color:var(--bg)" data-a="cpick"${S.comfort.length?'':' disabled'}>${p?'Open another':'Open the comfort box'}</button></div>
- <form id="fCo" class="card stack"><h3>Add to the box</h3><div class="row"><div><label for="coK">Type</label><select id="coK">${opts(CKIND)}</select></div><div><label for="coF">From</label><input id="coF" placeholder="e.g. My love"></div></div><div><label for="coT">Message</label><textarea id="coT" placeholder="e.g. You are so loved. One day at a time, okay?"></textarea></div><div><label for="coI">Photo (optional)</label><input id="coI" type="file" accept="image/*"></div><div><label for="coL">Song or link (optional)</label><input id="coL" type="url" placeholder="https://"></div><button>Add</button></form></div>
- <h2 style="margin:28px 0 12px">Everything in the box</h2>${S.comfort.length?`<div class="board">${S.comfort.map(x=>`<div class="vc"><div class="in stack"><div class="btns" style="justify-content:space-between;align-items:center"><span class="chip">${esc(x.kind)}</span><button class="sm del" data-a="codel" data-id="${x.id}">Delete</button></div>${itemBody(x)}</div></div>`).join('')}</div>`:'<p class="empty">Add screenshots of sweet messages, favorite photos or songs. Ask your partner to send some too.</p>'}`};
+ <form id="fCo" class="card stack"><h3>Add to the box</h3><div class="row"><div><label for="coK">Type</label><select id="coK">${opts(L('ckind'))}</select></div><div><label for="coF">From</label><input id="coF" placeholder="e.g. My love"></div></div><div><label for="coT">Message</label><textarea id="coT" placeholder="e.g. You are so loved. One day at a time, okay?"></textarea></div><div><label for="coI">Photo (optional)</label><input id="coI" type="file" accept="image/*"></div><div><label for="coL">Song or link (optional)</label><input id="coL" type="url" placeholder="https://"></div><button>Add</button></form></div>
+ <h2 style="margin:28px 0 12px">Everything in the box</h2>${S.comfort.length?`<div class="board">${S.comfort.map(x=>`<div class="vc"><div class="in stack"><div class="btns" style="justify-content:space-between;align-items:center"><span class="chip">${esc(x.kind)}</span><button class="sm ghost" data-a="edit" data-k="comfort" data-id="${x.id}">Edit</button><button class="sm del" data-a="codel" data-id="${x.id}">Delete</button></div>${itemBody(x)}</div></div>`).join('')}</div>`:'<p class="empty">Add screenshots of sweet messages, favorite photos or songs. Ask your partner to send some too.</p>'}`};
 
 V.prayer=()=>{
  const pr=S.prayers.filter(x=>x.status!=='Answered').sort((a,b)=>b.date.localeCompare(a.date)),an=S.prayers.filter(x=>x.status==='Answered').sort((a,b)=>(b.ans||'').localeCompare(a.ans||''));
  return `<div class="head"><div><h1>Prayer Journal</h1><p>Write your prayers down, and look back at how God answered.</p></div><div class="stats" style="min-width:260px"><div class="stat"><small>Praying</small><b>${pr.length}</b></div><div class="stat"><small>Answered</small><b class="pos">${an.length}</b></div></div></div>
  <div class="grid"><form id="fPr" class="card stack"><h3>New prayer</h3><div><label for="prT">Prayer request</label><textarea id="prT" required></textarea></div><div class="row"><div><label for="prW">For</label><input id="prW" placeholder="e.g. Myself, Mama, Allen"></div><div><label for="prD">Date</label><input id="prD" type="date" value="${TODAY()}"></div></div><button>Save prayer</button></form>
  <div class="stack"><h3>Still praying</h3>${pr.length?pr.map(x=>`<div class="card stack"><p style="white-space:pre-wrap">${esc(x.text)}</p><p class="muted">${x.who?'For '+esc(x.who)+' · ':''}Since ${nice(x.date)}</p><div class="row" style="align-items:end"><div><label for="pa${x.id}">How was it answered?</label><input id="pa${x.id}"></div><button class="ghost" data-a="pans" data-id="${x.id}">Answered!</button></div><button class="sm del" style="align-self:flex-start" data-a="pdel" data-id="${x.id}">Delete</button></div>`).join(''):'<p class="empty">No open prayer requests.</p>'}</div>
- <div class="card"><h3>Answered prayers</h3>${an.length?`<ul class="list">${an.map(x=>`<li><div><b style="white-space:pre-wrap">${esc(x.text)}</b>${x.answer?`<p>${esc(x.answer)}</p>`:''}<p class="muted">Prayed ${nice(x.date)} · answered ${nice(x.ans)}</p></div><button class="sm del" data-a="pdel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:'<p class="empty">Answered prayers will be kept here as reminders of His faithfulness.</p>'}</div></div>`};
+ <div class="card"><h3>Answered prayers</h3>${an.length?`<ul class="list">${an.map(x=>`<li><div><b style="white-space:pre-wrap">${esc(x.text)}</b>${x.answer?`<p>${esc(x.answer)}</p>`:''}<p class="muted">Prayed ${nice(x.date)} · answered ${nice(x.ans)}</p></div><button class="sm ghost" data-a="edit" data-k="prayers" data-id="${x.id}">Edit</button><button class="sm del" data-a="pdel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:'<p class="empty">Answered prayers will be kept here as reminders of His faithfulness.</p>'}</div></div>`};
 
 V.reading=()=>{
  const k=S.reading.plan,ch=chapters(k),done=S.reading.done[k]||[],nx=ch.findIndex((_,i)=>!done.includes(i)),p=done.length/ch.length*100;
@@ -460,14 +489,14 @@ V.bills=()=>{
  const m=TODAY().slice(0,7),L=[...S.bills].sort((a,b)=>a.due-b.due),tot=L.reduce((a,b)=>a+b.amt,0),un=L.filter(b=>!b.paid[m]);
  return `<div class="head"><div><h1>Bills</h1><p>Monthly bills and when they're due. Marking one paid also adds it to your Budget.</p></div></div>
  <div class="stats" style="margin-bottom:16px"><div class="stat"><small>Monthly bills</small><b>${peso(tot)}</b></div><div class="stat"><small>Still unpaid this month</small><b class="neg">${peso(un.reduce((a,b)=>a+b.amt,0))}</b><small>${un.length} ${un.length===1?'bill':'bills'}</small></div></div>
- <div class="grid"><div class="card"><h3>${new Date().toLocaleDateString('en-PH',{month:'long'})}</h3>${L.length?`<ul class="list">${L.map(b=>{const dd=billDate(b,m),n=daysTo(dd),paid=!!b.paid[m];return `<li><div><b>${esc(b.name)}</b><div class="muted">Due ${nice(dd)} · ${paid?'<span class="pos">Paid</span>':n>0?'in '+n+(n===1?' day':' days'):n===0?'<span class="neg">due today</span>':'<span class="neg">'+(-n)+(n===-1?' day':' days')+' overdue</span>'}</div></div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="num">${peso(b.amt)}</span><button class="sm ${paid?'ghost':''}" data-a="bpay" data-id="${b.id}">${paid?'Undo':'Paid'}</button><button class="sm del" data-a="bdel" data-id="${b.id}" aria-label="Delete">×</button></div></li>`}).join('')}</ul>`:'<p class="empty">No bills yet. Add rent, electricity, internet and others.</p>'}</div>
+ <div class="grid"><div class="card"><h3>${new Date().toLocaleDateString('en-PH',{month:'long'})}</h3>${L.length?`<ul class="list">${L.map(b=>{const dd=billDate(b,m),n=daysTo(dd),paid=!!b.paid[m];return `<li><div><b>${esc(b.name)}</b><div class="muted">Due ${nice(dd)} · ${paid?'<span class="pos">Paid</span>':n>0?'in '+n+(n===1?' day':' days'):n===0?'<span class="neg">due today</span>':'<span class="neg">'+(-n)+(n===-1?' day':' days')+' overdue</span>'}</div></div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="num">${peso(b.amt)}</span><button class="sm ${paid?'ghost':''}" data-a="bpay" data-id="${b.id}">${paid?'Undo':'Paid'}</button><button class="sm ghost" data-a="edit" data-k="bills" data-id="${b.id}">Edit</button><button class="sm del" data-a="bdel" data-id="${b.id}" aria-label="Delete">×</button></div></li>`}).join('')}</ul>`:'<p class="empty">No bills yet. Add rent, electricity, internet and others.</p>'}</div>
  <form id="fBi" class="card stack"><h3>Add a bill</h3><div><label for="biN">Bill</label><input id="biN" required placeholder="e.g. Meralco, PLDT, rent"></div><div class="row"><div><label for="biA">Amount (₱)</label><input id="biA" type="number" min="0" step="0.01" inputmode="decimal" required></div><div><label for="biD">Due every month on day</label><input id="biD" type="number" min="1" max="31" inputmode="numeric" required></div></div><button>Add bill</button></form></div>`};
 
 V.wishlist=()=>{
  const L=[...S.wish].sort((a,b)=>a.bought-b.bought),open=L.filter(w=>!w.bought);
  return `<div class="head"><div><h1>Wishlist</h1><p>Save up first, then buy. No impulse buys.</p></div><div class="stat"><small>Total wishlist</small><b>${peso(open.reduce((a,w)=>a+w.price,0))}</b></div></div>
  <div class="grid">${L.map(w=>{const p=w.price?Math.min(100,w.saved/w.price*100):0;return `<div class="card stack${w.bought?' tint':''}"><div class="btns" style="justify-content:space-between;align-items:baseline"><h3 style="margin:0">${esc(w.item)}</h3>${w.bought?'<span class="chip g">Bought</span>':''}</div><p><span class="big">${peso(w.saved)}</span> <span class="muted">of ${peso(w.price)}</span></p><div class="bar g"><i style="width:${p}%"></i></div>${safeUrl(w.link)?`<a href="${esc(safeUrl(w.link))}" target="_blank" rel="noopener">View item</a>`:''}
- ${w.bought?'':`<div class="row" style="align-items:end"><div><label for="w${w.id}">Add savings</label><input id="w${w.id}" type="number" step="0.01" inputmode="decimal" placeholder="e.g. 200"></div><button class="ghost" data-a="wdep" data-id="${w.id}">Add</button></div>`}<div class="btns"><button class="sm${w.bought?' ghost':''}" data-a="wbuy" data-id="${w.id}">${w.bought?'Undo':'Bought it!'}</button><button class="sm del" data-a="wdel" data-id="${w.id}">Delete</button></div></div>`}).join('')}
+ ${w.bought?'':`<div class="row" style="align-items:end"><div><label for="w${w.id}">Add savings</label><input id="w${w.id}" type="number" step="0.01" inputmode="decimal" placeholder="e.g. 200"></div><button class="ghost" data-a="wdep" data-id="${w.id}">Add</button></div>`}<div class="btns"><button class="sm${w.bought?' ghost':''}" data-a="wbuy" data-id="${w.id}">${w.bought?'Undo':'Bought it!'}</button><button class="sm ghost" data-a="edit" data-k="wish" data-id="${w.id}">Edit</button><button class="sm del" data-a="wdel" data-id="${w.id}">Delete</button></div></div>`}).join('')}
  <form id="fWi" class="card tint stack"><h3>Add to wishlist</h3><div><label for="wiN">Item</label><input id="wiN" required placeholder="e.g. New shoes"></div><div class="row"><div><label for="wiP">Price (₱)</label><input id="wiP" type="number" min="0" step="0.01" inputmode="decimal" required></div><div><label for="wiL">Link (optional)</label><input id="wiL" type="url" placeholder="https://"></div></div><button>Add</button></form></div>`};
 
 V.dates=()=>{
@@ -475,27 +504,27 @@ V.dates=()=>{
  return `<div class="head"><div><h1>Date Jar</h1><p>Can't decide what to do? Let the jar choose.</p></div><div class="stat"><small>Dates done</small><b>${dn.length}</b></div></div>
  <div class="grid"><div class="jar"><p class="big2">${p?esc(p.text):todo.length?'What should we do next?':'Add more ideas to the jar.'}</p><div class="btns"><button style="background:var(--bg);color:var(--ink);border-color:var(--bg)" data-a="dpick"${todo.length?'':' disabled'}>${p?'Pick another':'Pick a random date'}</button>${p?`<button class="ghost" style="color:inherit;border-color:currentColor" data-a="ddone" data-id="${p.id}">We did it!</button>`:''}</div></div>
  <form id="fDi" class="card stack"><h3>Add a date idea</h3><div><label for="diT">Idea</label><input id="diT" required placeholder="e.g. Try the new ramen place"></div><button>Add to jar</button><p class="muted">The first ten ideas are starters. Delete any you don't like.</p></form>
- <div class="card"><h3>In the jar (${todo.length})</h3>${todo.length?`<ul class="list">${todo.map(x=>`<li><span>${esc(x.text)}</span><span style="display:flex"><button class="sm ghost" data-a="ddone" data-id="${x.id}">Done</button><button class="sm del" data-a="ddel" data-id="${x.id}" aria-label="Delete">×</button></span></li>`).join('')}</ul>`:'<p class="empty">The jar is empty.</p>'}
- ${dn.length?`<h3 style="margin-top:16px">Done</h3><ul class="list">${dn.map(x=>`<li><span class="muted">${esc(x.text)}${x.on?' · '+nice(x.on):''}</span><button class="sm del" data-a="ddel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:''}</div></div>`};
+ <div class="card"><h3>In the jar (${todo.length})</h3>${todo.length?`<ul class="list">${todo.map(x=>`<li><span>${esc(x.text)}</span><span style="display:flex"><button class="sm ghost" data-a="ddone" data-id="${x.id}">Done</button><button class="sm ghost" data-a="edit" data-k="dateIdeas" data-id="${x.id}">Edit</button><button class="sm del" data-a="ddel" data-id="${x.id}" aria-label="Delete">×</button></span></li>`).join('')}</ul>`:'<p class="empty">The jar is empty.</p>'}
+ ${dn.length?`<h3 style="margin-top:16px">Done</h3><ul class="list">${dn.map(x=>`<li><span class="muted">${esc(x.text)}${x.on?' · '+nice(x.on):''}</span><button class="sm ghost" data-a="edit" data-k="dateIdeas" data-id="${x.id}">Edit</button><button class="sm del" data-a="ddel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>`:''}</div></div>`};
 
 V.important=()=>{
  const L=S.dates.map(x=>({...x,n:nextOcc(x.date,x.yearly)})).sort((a,b)=>(a.n<TODAY())-(b.n<TODAY())||a.n.localeCompare(b.n));
  return `<div class="head"><div><h1>Special Dates</h1><p>Anniversaries, birthdays and days worth counting down to.</p></div></div>
- <div class="grid"><div class="stack">${L.length?L.map(x=>{const d=daysTo(x.n),yrs=x.yearly?(+x.n.slice(0,4))-(+x.date.slice(0,4)):0;return `<div class="card cd"><span class="big">${d===0?'0':Math.abs(d)}</span><div style="flex:1"><b>${esc(x.title)}</b><div class="muted">${d===0?'Today!':d>0?(d===1?'day to go':'days to go'):(d===-1?'day ago':'days ago')} · ${nice(x.n)}${yrs>0?' · '+yrs+(yrs===1?' year':' years'):''}</div>${x.yearly?'<span class="chip n">Every year</span>':''}</div><button class="sm del" data-a="imdel" data-id="${x.id}" aria-label="Delete">×</button></div>`}).join(''):'<p class="empty">Start with your anniversary and birthdays.</p>'}</div>
+ <div class="grid"><div class="stack">${L.length?L.map(x=>{const d=daysTo(x.n),yrs=x.yearly?(+x.n.slice(0,4))-(+x.date.slice(0,4)):0;return `<div class="card cd"><span class="big">${d===0?'0':Math.abs(d)}</span><div style="flex:1"><b>${esc(x.title)}</b><div class="muted">${d===0?'Today!':d>0?(d===1?'day to go':'days to go'):(d===-1?'day ago':'days ago')} · ${nice(x.n)}${yrs>0?' · '+yrs+(yrs===1?' year':' years'):''}</div>${x.yearly?'<span class="chip n">Every year</span>':''}</div><button class="sm ghost" data-a="edit" data-k="dates" data-id="${x.id}">Edit</button><button class="sm del" data-a="imdel" data-id="${x.id}" aria-label="Delete">×</button></div>`}).join(''):'<p class="empty">Start with your anniversary and birthdays.</p>'}</div>
  <form id="fIm" class="card stack"><h3>Add a date</h3><div><label for="imT">What</label><input id="imT" required placeholder="e.g. Our anniversary"></div><div><label for="imD">Date</label><input id="imD" type="date" required></div><label style="display:flex;align-items:center;gap:10px;color:var(--ink)"><input type="checkbox" id="imY" checked>Repeats every year</label><button>Add</button></form></div>`};
 
 V.memories=()=>{
  const L=[...S.memories].sort((a,b)=>b.date.localeCompare(a.date));
  return `<div class="head"><div><h1>Our Memories</h1><p>Our story, one moment at a time.</p></div><div class="stat"><small>Memories</small><b>${L.length}</b></div></div>
  <div class="grid"><form id="fMe" class="card stack"><h3>Add a memory</h3><div class="row"><div><label for="meD">Date</label><input id="meD" type="date" value="${TODAY()}" required></div><div><label for="meT">Title</label><input id="meT" required placeholder="e.g. Our first date"></div></div><div><label for="meS">The story</label><textarea id="meS"></textarea></div><div><label for="meI">Photo (optional)</label><input id="meI" type="file" accept="image/*"></div><button>Save memory</button></form>
- <div class="card">${L.length?`<ul class="tl">${L.map(x=>`<li><div class="muted">${nice(x.date)}</div><h3 style="margin:2px 0 4px">${esc(x.title)}</h3>${x.story?`<p style="white-space:pre-wrap">${esc(x.story)}</p>`:''}${x.img?`<img src="${esc(x.img)}" alt="">`:''}<button class="sm del" data-a="medel" data-id="${x.id}">Delete</button></li>`).join('')}</ul>`:'<p class="empty">Your timeline will grow here.</p>'}</div></div>`};
+ <div class="card">${L.length?`<ul class="tl">${L.map(x=>`<li><div class="muted">${nice(x.date)}</div><h3 style="margin:2px 0 4px">${esc(x.title)}</h3>${x.story?`<p style="white-space:pre-wrap">${esc(x.story)}</p>`:''}${x.img?`<img src="${esc(x.img)}" alt="">`:''}<button class="sm ghost" data-a="edit" data-k="memories" data-id="${x.id}">Edit</button><button class="sm del" data-a="medel" data-id="${x.id}">Delete</button></li>`).join('')}</ul>`:'<p class="empty">Your timeline will grow here.</p>'}</div></div>`};
 
 V.planner=()=>{
  const L=S.tasks.filter(x=>x.date===pDate).sort((a,b)=>a.done-b.done||(b.pri==='Important')-(a.pri==='Important')),dn=L.filter(x=>x.done).length;
  const old=S.tasks.filter(x=>!x.done&&x.date<TODAY()).length,isT=pDate===TODAY();
  return `<div class="head"><div><h1>Daily Planner</h1><p>${isT?'Today':nice(pDate)} · ${dn} of ${L.length} done</p></div><div class="btns" style="align-items:end"><button class="ghost sm" data-a="pprev" aria-label="Previous day">‹</button><div style="width:170px"><label for="pD">Day</label><input id="pD" type="date" value="${pDate}"></div><button class="ghost sm" data-a="pnext" aria-label="Next day">›</button></div></div>
  ${isT&&old?`<div class="warn btns" style="justify-content:space-between;align-items:center"><span>${old} unfinished ${old===1?'task':'tasks'} from earlier days.</span><button class="sm" data-a="tmove">Move to today</button></div>`:''}
- <div class="grid"><div class="card"><div class="bar g" style="margin-bottom:12px"><i style="width:${L.length?dn/L.length*100:0}%"></i></div>${L.length?`<ul class="list">${L.map(x=>`<li class="task${x.done?' done':''}"><label class="task" style="margin:0;color:var(--ink);flex:1;font-size:16px"><input type="checkbox" data-a="ttog" data-id="${x.id}"${x.done?' checked':''}><span>${esc(x.text)}</span></label>${x.pri==='Important'?'<span class="chip">Important</span>':''}<button class="sm del" data-a="tdel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>${dn?'<button class="ghost sm" data-a="tclear" style="margin-top:8px">Clear finished</button>':''}`:'<p class="empty">Nothing planned yet. Add your first task.</p>'}</div>
+ <div class="grid"><div class="card"><div class="bar g" style="margin-bottom:12px"><i style="width:${L.length?dn/L.length*100:0}%"></i></div>${L.length?`<ul class="list">${L.map(x=>`<li class="task${x.done?' done':''}"><label class="task" style="margin:0;color:var(--ink);flex:1;font-size:16px"><input type="checkbox" data-a="ttog" data-id="${x.id}"${x.done?' checked':''}><span>${esc(x.text)}</span></label>${x.pri==='Important'?'<span class="chip">Important</span>':''}<button class="sm ghost" data-a="edit" data-k="tasks" data-id="${x.id}">Edit</button><button class="sm del" data-a="tkdel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>${dn?'<button class="ghost sm" data-a="tclear" style="margin-top:8px">Clear finished</button>':''}`:'<p class="empty">Nothing planned yet. Add your first task.</p>'}</div>
  <form id="fTa" class="card stack"><h3>Add a task</h3><div><label for="taT">Task</label><input id="taT" required placeholder="e.g. Buy groceries"></div><div><label for="taP">Priority</label><select id="taP">${opts(PRI)}</select></div><button>Add</button></form></div>`};
 
 function drawMood(){
@@ -516,9 +545,9 @@ function applyTheme(){const R=document.documentElement;if(S.theme==='auto'){base
 function render(){
  let r=location.hash.slice(1);if(!V[r])r='home';
  applyTheme();
- const cg=GROUPS.find(g=>g[1].includes(r));
+ GROUPS=G();let cg=GROUPS.find(g=>g[1].includes(r));if(!cg){r='home';cg=GROUPS[0]}
  $('#nav').innerHTML=GROUPS.map(g=>`<a href="#${g[1][0]}" class="${g===cg?'on':''}">${esc(g[0])}</a>`).join('');
- const sb=$('#sub');sb.style.display=cg[1].length>1?'':'none';sb.innerHTML=cg[1].length>1?cg[1].map(k=>`<a href="#${k}" class="${k===r?'on':''}">${NAMES[k]}</a>`).join(''):'';
+ const sb=$('#sub');sb.style.display=cg[1].length>1?'':'none';sb.innerHTML=cg[1].length>1?cg[1].map(k=>`<a href="#${k}" class="${k===r?'on':''}">${esc(tabName(k))}</a>`).join(''):'';
  $('#appName').textContent=S.name+"'s Space";
  $('#todayLbl').textContent=new Date().toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric'});
  $('#view').innerHTML=V[r]();
@@ -529,6 +558,54 @@ function render(){
 }
 function go(){save();render()}
 
+// ---------- generic editor for every kind of entry ----------
+const yn=[['true','Yes'],['false','No']];
+const ES={
+ vision:{t:'Edit dream',f:[['title','Dream'],['cat','Category','select',()=>L('vcat')],['note','Why it matters'],['img','Photo','image'],['done','Achieved','bool']]},
+ tx:{t:'Edit transaction',f:[['type','Type','select',[['out','Expense'],['in','Income']]],['amt','Amount (₱)','number'],['cat','Category','select',()=>[...new Set([...L('exp'),...L('inc')])]],['date','Date','date'],['note','Note']]},
+ letters:{t:'Edit letter',note:'The letter itself stays sealed until its date.',f:[['subject','Subject'],['open','Open on','date']]},
+ therapy:{t:'Edit therapy note',f:[['date','Session date','date'],['who','With whom / where'],['notes','What I learned','textarea'],['hw','Homework or next steps']]},
+ ipon:{t:'Edit savings goal',f:[['name','Saving for'],['target','Target (₱)','number'],['saved','Saved so far (₱)','number'],['by','Target date','date']]},
+ travel:{t:'Edit destination',f:[['place','Place'],['when','When','date'],['cost','Estimated budget (₱)','number'],['note','What we want to do there'],['status','Status','select',()=>TSTAT]]},
+ habits:{t:'Edit habit',f:[['name','Habit']]},
+ periods:{t:'Edit period',f:[['start','Start date','date'],['end','End date','date']]},
+ comfort:{t:'Edit comfort item',f:[['kind','Type','select',()=>L('ckind')],['from','From'],['text','Message','textarea'],['link','Song or link'],['img','Photo','image']]},
+ prayers:{t:'Edit prayer',f:[['text','Prayer request','textarea'],['who','For'],['date','Date','date'],['status','Status','select',()=>['Praying','Answered']],['answer','How it was answered','textarea']]},
+ bills:{t:'Edit bill',f:[['name','Bill'],['amt','Amount (₱)','number'],['due','Due every month on day','number']]},
+ wish:{t:'Edit wishlist item',f:[['item','Item'],['price','Price (₱)','number'],['saved','Saved so far (₱)','number'],['link','Link'],['bought','Bought','bool']]},
+ dateIdeas:{t:'Edit date idea',f:[['text','Idea'],['done','Done','bool']]},
+ dates:{t:'Edit special date',f:[['title','What'],['date','Date','date'],['yearly','Repeats every year','bool']]},
+ memories:{t:'Edit memory',f:[['date','Date','date'],['title','Title'],['story','The story','textarea'],['img','Photo','image']]},
+ tasks:{t:'Edit task',f:[['text','Task'],['date','Day','date'],['pri','Priority','select',()=>PRI],['done','Done','bool']]},
+ myVerses:{t:'Edit verse',f:[['ref','Reference'],['text','Verse','textarea']]},
+ sleep:{t:'Edit night',map:1,f:[['bed','Bedtime','time'],['wake','Wake time','time'],['q','How did you sleep?','select',()=>QUAL.map((q,i)=>[String(i+1),q])]]},
+ gratitude:{t:'Edit gratitude',map:1,f:[['0','1. Thank you, Lord, for…'],['1','2. Thank you, Lord, for…'],['2','3. Thank you, Lord, for…']]}
+};
+let EDT=null;
+function edItem(k,id){const sc=ES[k];if(sc.map)return S[k][id];return (S[k]||[]).find(x=>x.id===id)}
+function openEdit(k,id){
+ const sc=ES[k],it=edItem(k,id);if(!it)return;EDT={k,id};
+ const fld=([n,l,ty,o])=>{const v=it[n],idn='e_'+n;
+  if(ty==='image')return `<div><label for="${idn}">${l}</label>${v?`<img src="${esc(v)}" alt="" style="max-width:120px;border-radius:10px;display:block;margin-bottom:6px"><label class="chk"><input type="checkbox" id="e_rmimg">Remove photo</label>`:''}<input id="${idn}" type="file" accept="image/*"></div>`;
+  if(ty==='bool')return `<label class="chk"><input type="checkbox" id="${idn}"${v?' checked':''}>${l}</label>`;
+  if(ty==='select'){const list=typeof o==='function'?o():o;return `<div><label for="${idn}">${l}</label><select id="${idn}">${list.map(x=>{const[a,b]=Array.isArray(x)?x:[x,x];return `<option value="${esc(a)}"${String(v)===String(a)?' selected':''}>${esc(b)}</option>`}).join('')}</select></div>`}
+  if(ty==='textarea')return `<div><label for="${idn}">${l}</label><textarea id="${idn}">${esc(v??'')}</textarea></div>`;
+  return `<div><label for="${idn}">${l}</label><input id="${idn}" type="${ty||'text'}"${ty==='number'?' step="any" inputmode="decimal"':''} value="${esc(v??'')}"></div>`};
+ $('#layer').innerHTML=`<div class="modal"><form class="card stack" id="fEdit" style="max-height:90vh;overflow:auto"><h3>${sc.t}</h3>${sc.note?`<p class="muted">${sc.note}</p>`:''}${sc.f.map(fld).join('')}<div class="btns"><button>Save changes</button><button type="button" class="ghost" id="eX">Cancel</button></div></form></div>`;
+ $('#eX').onclick=()=>{$('#layer').innerHTML='';EDT=null};
+ const first=$('#fEdit input:not([type=file]):not([type=checkbox]),#fEdit textarea');if(first)first.focus()}
+function saveEdit(){
+ const{k,id}=EDT,sc=ES[k],it=edItem(k,id);let pend=null;
+ for(const[n,,ty]of sc.f){const e=document.getElementById('e_'+n);if(!e)continue;
+  if(ty==='image'){if(e.files[0])pend=n;else if($('#e_rmimg')&&$('#e_rmimg').checked)it[n]='';continue}
+  if(ty==='bool'){it[n]=e.checked;continue}
+  let v=e.value.trim();if(ty==='number')v=Number(v)||0;if(k==='sleep'&&n==='q')v=+v;if(k==='bills'&&n==='due')v=Math.min(31,Math.max(1,Math.round(v)||1));it[n]=v}
+ if(k==='prayers'&&it.status==='Answered'&&!it.ans)it.ans=TODAY();
+ const done=()=>{$('#layer').innerHTML='';EDT=null;go();toast('Changes saved.')};
+ if(pend){const f=document.getElementById('e_'+pend).files[0];shrink(f,img=>{it[pend]=img;done()})}else done()}
+document.addEventListener('submit',e=>{if(e.target.id==='fEdit'){e.preventDefault();saveEdit()}});
+
+
 function shrink(file,cb){const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,700/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.72))};im.onerror=()=>toast('Couldn\u2019t read that photo.');im.src=rd.result};rd.readAsDataURL(file)}
 
 document.addEventListener('submit',e=>{
@@ -538,7 +615,7 @@ document.addEventListener('submit',e=>{
  if(id==='fLim'){S.limits[bMonth]=Number(val('lA'))||0;go()}
  if(id==='fJ'){const o={date:val('jD')||TODAY(),mood:val('jM'),title:val('jT'),body:$('#jB').value};if(openJ){Object.assign(S.journal.find(j=>j.id===openJ),o);openJ=null}else S.journal.push({id:uid(),...o});go();toast('Journal entry saved.')}
  if(id==='fL'){S.letters.push({id:uid(),subject:val('lS'),open:val('lD'),body:$('#lB').value,made:TODAY()});go();toast('Sealed. See you in the future!')}
- if(id==='fC'){S.checkins[TODAY()]={mood:+$('#cM').value,anx:+$('#cA').value,sleep:val('cS'),habits:HABITS.map((_,i)=>i).filter(i=>$('#h'+i).checked),note:$('#cN').value};go();toast('Thank you for checking in with yourself.')}
+ if(id==='fC'){S.checkins[TODAY()]={mood:+$('#cM').value,anx:+$('#cA').value,sleep:val('cS'),habits:L('selfcare').filter((_,i)=>$('#h'+i).checked),note:$('#cN').value};go();toast('Thank you for checking in with yourself.')}
  if(id==='fTh'){S.therapy.push({id:uid(),date:val('thD')||TODAY(),who:val('thW'),notes:$('#thN').value,hw:val('thH')});go()}
  if(id==='fG'){S.gratitude[TODAY()]=[0,1,2].map(i=>val('g'+i));go();toast('Thank you, Lord!')}
  if(id==='fW'){const d=val('wD')||TODAY(),s=Number(val('wS'))||0;if(!s&&!val('wM'))delete S.walks[d];else S.walks[d]={steps:s,mins:val('wM'),km:val('wK')};go()}
@@ -557,6 +634,9 @@ document.addEventListener('submit',e=>{
  if(id==='fTa'){S.tasks.push({id:uid(),date:pDate,text:val('taT'),pri:val('taP'),done:false});go()}
  if(id==='fCpw'){const n=$('#cp1').value;if(n!==$('#cp2').value)return toast('New passwords don\u2019t match.');if(n.length<8)return toast('Use at least 8 characters.');changePw($('#cp0').value,n).then(()=>{e.target.reset();toast('Password changed.')},x=>toast(errMsg(x)))}
  if(id==='fRk'){regenRec($('#rk0').value).then(k=>{e.target.reset();const o=$('#rkOut');o.innerHTML='<p><b>Your new recovery key. Save it now:</b></p><div class="reckey"></div>';o.querySelector('.reckey').textContent=k},x=>toast(errMsg(x)))}
+ if(id==='fUi'){const u=UI();GBASE.forEach(([key,label,tabs])=>{const g=document.getElementById('g_'+key);if(g){const v=g.value.trim();if(v&&v!==label)u.g[key]=v;else delete u.g[key]}tabs.forEach(k=>{const t=document.getElementById('t_'+k),c=document.getElementById('v_'+k);if(t){const v=t.value.trim();if(v&&v!==NAMES[k])u.t[k]=v;else delete u.t[k]}if(c&&!LOCKED.includes(k)){u.hide=u.hide.filter(x=>x!==k);if(!c.checked)u.hide.push(k)}})});go();toast('Saved.')}
+ if(id==='fLists'){S.lists=S.lists||{};Object.keys(LDEF).forEach(k=>{const a=document.getElementById('l_'+k).value.split('\n').map(x=>x.trim()).filter(Boolean);if(a.length&&a.join('|')!==LDEF[k].join('|'))S.lists[k]=[...new Set(a)];else delete S.lists[k]});go();toast('Lists saved.')}
+ if(id==='fMv'){S.myVerses=S.myVerses||[];S.myVerses.push({id:uid(),ref:val('mvR'),text:$('#mvT').value.trim()});go();toast('Verse added.')}
  if(id==='fName'){S.name=val('nm')||'Sheila';go();toast('Name updated.')}
  if(id==='fRes'){const f=$('#rF').files[0],apply=txt=>{try{const d=JSON.parse(txt);if(typeof d!=='object'||!d)throw 0;S=Object.assign(DEF(),d);if(!S.reading||!S.reading.done)S.reading={plan:'gospels',done:{}};go();toast('Data restored!')}catch(x){toast('That backup isn\u2019t valid.')}};if(f){const rd=new FileReader();rd.onload=()=>apply(rd.result);rd.readAsText(f)}else if(val('rT'))apply(val('rT'));else toast('No backup provided.')}
 });
@@ -564,6 +644,10 @@ document.addEventListener('submit',e=>{
 document.addEventListener('click',e=>{
  const b=e.target.closest('[data-a]');if(!b||b.tagName==='SELECT')return;const a=b.dataset.a,id=b.dataset.id;
  const rm=(k,msg)=>ask(msg,()=>{S[k]=S[k].filter(x=>x.id!==id);go()});
+ if(a==='mv'){const g=b.dataset.g,tabs=GBASE.find(x=>x[0]===g)[2],o=ordered(g,tabs),i=o.indexOf(id),j=i+(+b.dataset.d);if(j>=0&&j<o.length){[o[i],o[j]]=[o[j],o[i]];UI().order[g]=o;go()}return}
+ if(a==='uireset'){ask('Reset all page names, order and hidden pages?',()=>{S.ui={g:{},t:{},hide:[],order:{}};go()});return}
+ if(a==='mvdel'){ask('Delete this verse?',()=>{S.myVerses=S.myVerses.filter(v=>v.id!==id);go()});return}
+ if(a==='edit'){openEdit(b.dataset.k,b.dataset.id);return}
  if(a==='vdone'){const x=S.vision.find(v=>v.id===id);x.done=!x.done;go()}
  if(a==='vdel')rm('vision','Delete this dream from your board?');
  if(a==='txdel')rm('tx','Delete this transaction?');
@@ -571,7 +655,7 @@ document.addEventListener('click',e=>{
  if(a==='vnext'){vOff++;render()}
  if(a==='vfav'){const i=+id;S.fav=S.fav.includes(i)?S.fav.filter(f=>f!==i):[...S.fav,i];go()}
  if(a==='vunfav'){S.fav=S.fav.filter(f=>f!==+id);go()}
- if(a==='vcopy'){const v=VERSES[+id];navigator.clipboard.writeText(`"${v[1]}" — ${v[0]} (KJV)`).then(()=>toast('Copied!'),()=>toast('Copying isn\u2019t available here.'))}
+ if(a==='vcopy'){const v=ALLV()[+id];navigator.clipboard.writeText(`"${v[1]}" — ${v[0]} (KJV)`).then(()=>toast('Copied!'),()=>toast('Copying isn\u2019t available here.'))}
  if(a==='vnote'){const t=$('#vr').value;if(t.trim())S.vnotes[id]=t;else delete S.vnotes[id];go();toast('Reflection saved.')}
  if(a==='jedit'){openJ=id;render();scrollTo({top:0,behavior:'smooth'})}
  if(a==='jcancel'){openJ=null;render()}
@@ -607,7 +691,7 @@ document.addEventListener('click',e=>{
  if(a==='imdel')rm('dates','Delete this date?');
  if(a==='medel')rm('memories','Delete this memory?');
  if(a==='ttog'){const x=S.tasks.find(v=>v.id===id);x.done=!x.done;go()}
- if(a==='tdel'){S.tasks=S.tasks.filter(x=>x.id!==id);go()}
+ if(a==='tkdel'){S.tasks=S.tasks.filter(x=>x.id!==id);go()}
  if(a==='tclear'){S.tasks=S.tasks.filter(x=>!(x.done&&x.date===pDate));go()}
  if(a==='tmove'){S.tasks.forEach(x=>{if(!x.done&&x.date<TODAY())x.date=TODAY()});go()}
  if(a==='pprev'){pDate=addDays(pDate,-1);render()}
@@ -621,7 +705,7 @@ document.addEventListener('change',e=>{
  if(t.id==='rPlan'){S.reading.plan=t.value;go()}
  if(t.id==='pD'&&t.value){pDate=t.value;render()}
  if(t.id==='thm'){S.theme=t.value;go()}
- if(t.id==='tT'){$('#tC').innerHTML=opts(t.value==='in'?INC:EXP)}
+ if(t.id==='tT'){$('#tC').innerHTML=opts(t.value==='in'?L('inc'):L('exp'))}
  if(t.dataset.a==='tstat'){const x=S.travel.find(v=>v.id===t.dataset.id);x.status=t.value;go()}
 });
 document.addEventListener('input',e=>{if(e.target.id==='jS'){jq=e.target.value;const p=e.target.selectionStart;render();const s=$('#jS');s.focus();s.setSelectionRange(p,p)}});

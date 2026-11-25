@@ -196,8 +196,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 {
-const NAMES={customize:'Customize',home:'Home',wellness:'Self-Care',habits:'Habits',sleep:'Sleep',cycle:'Cycle',journal:'Journal',gratitude:'Gratitude',comfort:'Comfort Box',letters:'Future Me',verse:'Daily Verse',prayer:'Prayer Journal',reading:'Bible Reading',budget:'Budget',bills:'Bills',wishlist:'Wishlist',planner:'Planner',vision:'Vision Board',walk:'Walking',corner:'Savings & Travel',dates:'Date Jar',important:'Special Dates',memories:'Memories',backup:'Settings'};
-const GBASE=[['home','Home',['home']],['me','Me',['wellness','habits','sleep','cycle','journal','gratitude','comfort','letters']],['faith','Faith',['verse','prayer','reading']],['money','Money',['budget','bills','wishlist']],['goals','Goals',['planner','vision','walk']],['us','Allen & Sheila',['corner','dates','important','memories']],['settings','Settings',['backup','customize']]];
+const NAMES={reminders:'Reminders',customize:'Customize',home:'Home',wellness:'Self-Care',habits:'Habits',sleep:'Sleep',cycle:'Cycle',journal:'Journal',gratitude:'Gratitude',comfort:'Comfort Box',letters:'Future Me',verse:'Daily Verse',prayer:'Prayer Journal',reading:'Bible Reading',budget:'Budget',bills:'Bills',wishlist:'Wishlist',planner:'Planner',vision:'Vision Board',walk:'Walking',corner:'Savings & Travel',dates:'Date Jar',important:'Special Dates',memories:'Memories',backup:'Settings'};
+const GBASE=[['home','Home',['home']],['me','Me',['wellness','habits','sleep','cycle','journal','gratitude','comfort','letters']],['faith','Faith',['verse','prayer','reading']],['money','Money',['budget','bills','wishlist']],['goals','Goals',['reminders','planner','vision','walk']],['us','Allen & Sheila',['corner','dates','important','memories']],['settings','Settings',['backup','customize']]];
 const LOCKED=['home','backup','customize'];
 const UI=()=>S.ui||(S.ui={g:{},t:{},hide:[],order:{}});
 const tabName=k=>UI().t[k]||NAMES[k];
@@ -310,7 +310,7 @@ V.home=()=>{
   <a class="stat" href="#important" style="text-decoration:none;color:inherit"><small>${up?esc(up.title):'Special dates'}</small><b>${up?(daysTo(up.n)===0?'Today!':daysTo(up.n)+' days'):'\u2014'}</b><small>${up?nice(up.n):'Add your anniversary'}</small></a>
  </div>
  ${G().slice(1).map(g=>`<h2 style="margin-top:28px">${esc(g[0])}</h2><div class="tiles">${g[1].map(k=>`<a class="tile" href="#${k}"><b>${esc(tabName(k))}</b><span>${TIP[k]}</span></a>`).join('')}</div>`).join('')}`};
-const TIP={vision:'Dreams you want to see every day',budget:'Income, expenses and monthly budget',verse:'One verse a day',journal:'For your thoughts and feelings',letters:'Letters you can only open on a set date',wellness:'Mood, anxiety, therapy and self-care',gratitude:'Three things you\u2019re thankful for',walk:'Steps, minutes and streaks',corner:'Our savings and travel goals',backup:'Name, theme, backup and restore',habits:'Your own daily habits and streaks',sleep:'Bedtime, wake time and sleep quality',cycle:'Period log and next-cycle prediction',comfort:'Open this on heavy days',prayer:'Prayer requests and answered prayers',reading:'Chapter-by-chapter reading plan',bills:'Monthly bills and due dates',wishlist:'Things to save up for',planner:'Daily to-do list',dates:'Date ideas and a random pick',important:'Countdowns to the days that matter',memories:'Our story, one moment at a time',customize:'Rename, hide and reorder pages; edit lists'};
+const TIP={vision:'Dreams you want to see every day',budget:'Income, expenses and monthly budget',verse:'One verse a day',journal:'For your thoughts and feelings',letters:'Letters you can only open on a set date',wellness:'Mood, anxiety, therapy and self-care',gratitude:'Three things you\u2019re thankful for',walk:'Steps, minutes and streaks',corner:'Our savings and travel goals',backup:'Name, theme, backup and restore',habits:'Your own daily habits and streaks',sleep:'Bedtime, wake time and sleep quality',cycle:'Period log and next-cycle prediction',comfort:'Open this on heavy days',prayer:'Prayer requests and answered prayers',reading:'Chapter-by-chapter reading plan',bills:'Monthly bills and due dates',wishlist:'Things to save up for',planner:'Daily to-do list',reminders:'Custom reminders that pop up on your phone',dates:'Date ideas and a random pick',important:'Countdowns to the days that matter',memories:'Our story, one moment at a time',customize:'Rename, hide and reorder pages; edit lists'};
 
 V.vision=()=>`<div class="head"><div><h1>Vision Board</h1><p>Pin the things you want to happen in your life. You can add a photo to each one.</p></div></div>
  <div class="grid" style="grid-template-columns:minmax(0,1fr)">
@@ -413,6 +413,12 @@ V.backup=()=>`<div class="head"><div><h1>Settings</h1><p>Your entries are encryp
  <div class="grid">
  <div class="card stack"><h3>Account</h3><p>Signed in as <b>${esc(ME?ME.email:'')}</b></p><p class="muted">Synced to your account. Log in on any phone or computer to see the same entries.</p><button class="ghost" data-a="logout">Log out</button></div>
  <form id="fName" class="card stack"><h3>Your name</h3><div><label for="nm">Name</label><input id="nm" value="${esc(S.name)}"></div><button>Save</button><div><label for="thm">Theme</label><select id="thm">${[['auto','Match my phone'],['light','Light'],['dark','Dark']].map(([k,l])=>`<option value="${k}"${S.theme===k?' selected':''}>${l}</option>`).join('')}</select></div></form>
+ <div class="card stack"><h3>Notifications</h3><p id="nStat" class="muted">Checking this device\u2026</p>${/iPhone|iPad|iPod/.test(navigator.userAgent)&&!navigator.standalone?'<p class="warn" style="margin:0">On iPhone, first add this app to your Home Screen (Share, then Add to Home Screen) and open it from there. Notifications only work that way.</p>':''}
+ <div class="btns"><button type="button" id="nOn" data-a="pushon">Turn on for this device</button><button type="button" class="ghost" data-a="pushtest">Send a test</button></div>
+ <form id="fNt" class="stack" style="border-top:1px solid var(--line);padding-top:12px"><p class="muted" style="margin:0">Remind me about</p>
+ ${[['bills','Bills (the day before and on the due date)'],['tasks','Planner tasks'],['dates','Special dates (3 days before and on the day)'],['cycle','My next period (2 days before)']].map(([k,l])=>`<label class="chk"><input type="checkbox" id="n_${k}"${NT()[k]?' checked':''}>${l}</label>`).join('')}
+ ${[['verse','Daily verse'],['checkin','Evening check-in and gratitude'],['habits','My habits']].map(([k,l])=>`<div class="crow" style="grid-template-columns:auto minmax(0,1fr) 8.5em"><input type="checkbox" id="n_${k}"${NT()[k]?' checked':''} aria-label="${l}"><label for="n_${k}" style="margin:0;color:var(--ink);font-size:15px">${l}</label><input type="time" id="n_${k}T" value="${NT()[k+'T']}" aria-label="${l} time"></div>`).join('')}
+ <button>Save notification settings</button></form></div>
  <form id="fCpw" class="card stack"><h3>Change password</h3><div><label for="cp0">Current password</label><input id="cp0" type="password" autocomplete="current-password" required></div><div><label for="cp1">New password</label><input id="cp1" type="password" autocomplete="new-password" minlength="8" required></div><div><label for="cp2">Confirm new password</label><input id="cp2" type="password" autocomplete="new-password" required></div><button>Change password</button></form>
  <form id="fRk" class="card stack"><h3>Recovery key</h3><p class="muted">Lost your recovery key? Make a new one. The old one will stop working.</p><div><label for="rk0">Password</label><input id="rk0" type="password" autocomplete="current-password" required></div><button class="ghost">Make a new recovery key</button><div id="rkOut"></div></form>
  <div class="card stack"><h3>Export a copy</h3><p class="muted">Optional. Download all your entries as a file, or copy them as text.</p><div class="btns"><button data-a="dlbk">Download file</button><button class="ghost" data-a="copybk">Copy as text</button></div></div>
@@ -434,6 +440,18 @@ V.customize=()=>{const u=UI();
  <form id="fMv" class="stack"><div><label for="mvR">Reference</label><input id="mvR" required placeholder="e.g. Psalm 91:1"></div><div><label for="mvT">Verse</label><textarea id="mvT" required></textarea></div><button>Add verse</button></form>
  ${(S.myVerses||[]).length?`<ul class="list">${S.myVerses.map(v=>`<li><div><b>${esc(v.ref)}</b><p class="muted">${esc(v.text)}</p></div><span style="display:flex"><button class="sm ghost" data-a="edit" data-k="myVerses" data-id="${v.id}">Edit</button><button class="sm del" data-a="mvdel" data-id="${v.id}" aria-label="Delete">×</button></span></li>`).join('')}</ul>`:''}</div>
  </div></div>`};
+
+const REP=[['','Once'],['daily','Every day'],['weekly','Every week'],['monthly','Every month']];
+const fmtT=t=>{if(!t)return'';const[h,m]=t.split(':').map(Number);return ((h+11)%12+1)+':'+pad(m)+(h<12?' AM':' PM')};
+V.reminders=()=>{
+ const R=[...(S.rems||[])].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+ return `<div class="head"><div><h1>Reminders</h1><p>These pop up as notifications on your phone, even when the app is closed.</p></div><a class="stat" href="#backup" style="text-decoration:none;color:inherit"><small>Notifications</small><b style="font-size:20px" id="nBadge">Settings</b></a></div>
+ <div class="grid"><form id="fRm" class="card stack"><h3>New reminder</h3><div><label for="rmT">Remind me to</label><input id="rmT" required placeholder="e.g. Take my vitamins"></div><div><label for="rmN">Details (optional)</label><input id="rmN"></div>
+ <div class="row"><div><label for="rmD">Date</label><input id="rmD" type="date" value="${TODAY()}" required></div><div><label for="rmH">Time</label><input id="rmH" type="time" value="20:00" required></div></div>
+ <div><label for="rmR">Repeats</label><select id="rmR">${REP.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></div><button>Save reminder</button></form>
+ <div class="card"><h3>Your reminders</h3>${R.length?`<ul class="list">${R.map(r=>{const nx=nextRem(r);return `<li><div><b>${esc(r.title)}</b>${r.note?`<div class="muted">${esc(r.note)}</div>`:''}<div class="muted">${nx?nice(ymd(nx))+' · '+fmtT(r.time):'Done'}${r.repeat?' · '+REP.find(x=>x[0]===r.repeat)[1].toLowerCase():''}</div></div><span style="display:flex"><button class="sm ghost" data-a="edit" data-k="rems" data-id="${r.id}">Edit</button><button class="sm del" data-a="rmdel" data-id="${r.id}" aria-label="Delete">×</button></span></li>`}).join('')}</ul>`:'<p class="empty">No reminders yet.</p>'}</div></div>`};
+function nextRem(r){let d=atLocal(r.date,r.time);if(!d)return null;if(d>new Date())return d;if(!r.repeat)return null;while(d<=new Date()){if(r.repeat==='daily')d.setDate(d.getDate()+1);else if(r.repeat==='weekly')d.setDate(d.getDate()+7);else d.setMonth(d.getMonth()+1)}return d}
+function atLocal(ds,ts){if(!ds)return null;const[h,m]=(ts||'08:00').split(':').map(Number);const d=parse(ds);d.setHours(h||0,m||0,0,0);return d}
 
 V.habits=()=>{
  const t=TODAY(),days=[...Array(7)].map((_,i)=>addDays(t,i-6)),done=(S.hlog[t]||[]).filter(id=>S.habits.some(h=>h.id===id)).length;
@@ -524,8 +542,8 @@ V.planner=()=>{
  const old=S.tasks.filter(x=>!x.done&&x.date<TODAY()).length,isT=pDate===TODAY();
  return `<div class="head"><div><h1>Daily Planner</h1><p>${isT?'Today':nice(pDate)} · ${dn} of ${L.length} done</p></div><div class="btns" style="align-items:end"><button class="ghost sm" data-a="pprev" aria-label="Previous day">‹</button><div style="width:170px"><label for="pD">Day</label><input id="pD" type="date" value="${pDate}"></div><button class="ghost sm" data-a="pnext" aria-label="Next day">›</button></div></div>
  ${isT&&old?`<div class="warn btns" style="justify-content:space-between;align-items:center"><span>${old} unfinished ${old===1?'task':'tasks'} from earlier days.</span><button class="sm" data-a="tmove">Move to today</button></div>`:''}
- <div class="grid"><div class="card"><div class="bar g" style="margin-bottom:12px"><i style="width:${L.length?dn/L.length*100:0}%"></i></div>${L.length?`<ul class="list">${L.map(x=>`<li class="task${x.done?' done':''}"><label class="task" style="margin:0;color:var(--ink);flex:1;font-size:16px"><input type="checkbox" data-a="ttog" data-id="${x.id}"${x.done?' checked':''}><span>${esc(x.text)}</span></label>${x.pri==='Important'?'<span class="chip">Important</span>':''}<button class="sm ghost" data-a="edit" data-k="tasks" data-id="${x.id}">Edit</button><button class="sm del" data-a="tkdel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>${dn?'<button class="ghost sm" data-a="tclear" style="margin-top:8px">Clear finished</button>':''}`:'<p class="empty">Nothing planned yet. Add your first task.</p>'}</div>
- <form id="fTa" class="card stack"><h3>Add a task</h3><div><label for="taT">Task</label><input id="taT" required placeholder="e.g. Buy groceries"></div><div><label for="taP">Priority</label><select id="taP">${opts(PRI)}</select></div><button>Add</button></form></div>`};
+ <div class="grid"><div class="card"><div class="bar g" style="margin-bottom:12px"><i style="width:${L.length?dn/L.length*100:0}%"></i></div>${L.length?`<ul class="list">${L.map(x=>`<li class="task${x.done?' done':''}"><label class="task" style="margin:0;color:var(--ink);flex:1;font-size:16px"><input type="checkbox" data-a="ttog" data-id="${x.id}"${x.done?' checked':''}><span>${esc(x.text)}</span></label>${x.time?`<span class="chip n">${esc(fmtT(x.time))}</span>`:''}${x.pri==='Important'?'<span class="chip">Important</span>':''}<button class="sm ghost" data-a="edit" data-k="tasks" data-id="${x.id}">Edit</button><button class="sm del" data-a="tkdel" data-id="${x.id}" aria-label="Delete">×</button></li>`).join('')}</ul>${dn?'<button class="ghost sm" data-a="tclear" style="margin-top:8px">Clear finished</button>':''}`:'<p class="empty">Nothing planned yet. Add your first task.</p>'}</div>
+ <form id="fTa" class="card stack"><h3>Add a task</h3><div><label for="taT">Task</label><input id="taT" required placeholder="e.g. Buy groceries"></div><div class="row"><div><label for="taH">Time (optional)</label><input id="taH" type="time"></div><div><label for="taP">Priority</label><select id="taP">${opts(PRI)}</select></div></div><button>Add</button><p class="muted" style="font-size:14px">With a time, you get a notification then. Without one, it\u2019s in your 8 AM summary.</p></form></div>`};
 
 function drawMood(){
  const s=$('#ms');if(!s)return;
@@ -553,6 +571,7 @@ function render(){
  $('#view').innerHTML=V[r]();
  for(const on of document.querySelectorAll('nav .on'))on.scrollIntoView({block:'nearest',inline:'center'});
  if(ro){ro.disconnect();ro=null}
+ if(r==='backup')showPushState();
  if(r==='wellness'){ro=new ResizeObserver(drawMood);ro.observe($('#ms'));
   const m=$('#cM'),a=$('#cA');m.oninput=()=>$('#cMv').textContent=m.value;a.oninput=()=>$('#cAv').textContent=a.value}
 }
@@ -576,7 +595,8 @@ const ES={
  dateIdeas:{t:'Edit date idea',f:[['text','Idea'],['done','Done','bool']]},
  dates:{t:'Edit special date',f:[['title','What'],['date','Date','date'],['yearly','Repeats every year','bool']]},
  memories:{t:'Edit memory',f:[['date','Date','date'],['title','Title'],['story','The story','textarea'],['img','Photo','image']]},
- tasks:{t:'Edit task',f:[['text','Task'],['date','Day','date'],['pri','Priority','select',()=>PRI],['done','Done','bool']]},
+ rems:{t:'Edit reminder',f:[['title','Reminder'],['note','Details'],['date','Date','date'],['time','Time','time'],['repeat','Repeats','select',()=>REP]]},
+ tasks:{t:'Edit task',f:[['text','Task'],['date','Day','date'],['time','Time (optional)','time'],['pri','Priority','select',()=>PRI],['done','Done','bool']]},
  myVerses:{t:'Edit verse',f:[['ref','Reference'],['text','Verse','textarea']]},
  sleep:{t:'Edit night',map:1,f:[['bed','Bedtime','time'],['wake','Wake time','time'],['q','How did you sleep?','select',()=>QUAL.map((q,i)=>[String(i+1),q])]]},
  gratitude:{t:'Edit gratitude',map:1,f:[['0','1. Thank you, Lord, for…'],['1','2. Thank you, Lord, for…'],['2','3. Thank you, Lord, for…']]}
@@ -631,12 +651,14 @@ document.addEventListener('submit',e=>{
  if(id==='fDi'){S.dateIdeas.push({id:uid(),text:val('diT'),done:false});go()}
  if(id==='fIm'){S.dates.push({id:uid(),title:val('imT'),date:val('imD'),yearly:$('#imY').checked});go()}
  if(id==='fMe'){const f=$('#meI').files[0],o={date:val('meD')||TODAY(),title:val('meT'),story:$('#meS').value.trim()},add=img=>{S.memories.push({id:uid(),...o,img});if(!save())S.memories.pop();render();toast('Memory saved.')};f?shrink(f,add):add('')}
- if(id==='fTa'){S.tasks.push({id:uid(),date:pDate,text:val('taT'),pri:val('taP'),done:false});go()}
+ if(id==='fRm'){S.rems=S.rems||[];S.rems.push({id:uid(),title:val('rmT'),note:val('rmN'),date:val('rmD'),time:val('rmH'),repeat:val('rmR')});go();toast('Reminder saved.')}
+ if(id==='fTa'){S.tasks.push({id:uid(),date:pDate,text:val('taT'),time:val('taH'),pri:val('taP'),done:false});go()}
  if(id==='fCpw'){const n=$('#cp1').value;if(n!==$('#cp2').value)return toast('New passwords don\u2019t match.');if(n.length<8)return toast('Use at least 8 characters.');changePw($('#cp0').value,n).then(()=>{e.target.reset();toast('Password changed.')},x=>toast(errMsg(x)))}
  if(id==='fRk'){regenRec($('#rk0').value).then(k=>{e.target.reset();const o=$('#rkOut');o.innerHTML='<p><b>Your new recovery key. Save it now:</b></p><div class="reckey"></div>';o.querySelector('.reckey').textContent=k},x=>toast(errMsg(x)))}
  if(id==='fUi'){const u=UI();GBASE.forEach(([key,label,tabs])=>{const g=document.getElementById('g_'+key);if(g){const v=g.value.trim();if(v&&v!==label)u.g[key]=v;else delete u.g[key]}tabs.forEach(k=>{const t=document.getElementById('t_'+k),c=document.getElementById('v_'+k);if(t){const v=t.value.trim();if(v&&v!==NAMES[k])u.t[k]=v;else delete u.t[k]}if(c&&!LOCKED.includes(k)){u.hide=u.hide.filter(x=>x!==k);if(!c.checked)u.hide.push(k)}})});go();toast('Saved.')}
  if(id==='fLists'){S.lists=S.lists||{};Object.keys(LDEF).forEach(k=>{const a=document.getElementById('l_'+k).value.split('\n').map(x=>x.trim()).filter(Boolean);if(a.length&&a.join('|')!==LDEF[k].join('|'))S.lists[k]=[...new Set(a)];else delete S.lists[k]});go();toast('Lists saved.')}
  if(id==='fMv'){S.myVerses=S.myVerses||[];S.myVerses.push({id:uid(),ref:val('mvR'),text:$('#mvT').value.trim()});go();toast('Verse added.')}
+ if(id==='fNt'){const n=NT();['bills','tasks','dates','cycle','verse','checkin','habits'].forEach(k=>{n[k]=$('#n_'+k).checked;const t=$('#n_'+k+'T');if(t&&t.value)n[k+'T']=t.value});go();toast('Notification settings saved.')}
  if(id==='fName'){S.name=val('nm')||'Sheila';go();toast('Name updated.')}
  if(id==='fRes'){const f=$('#rF').files[0],apply=txt=>{try{const d=JSON.parse(txt);if(typeof d!=='object'||!d)throw 0;S=Object.assign(DEF(),d);if(!S.reading||!S.reading.done)S.reading={plan:'gospels',done:{}};go();toast('Data restored!')}catch(x){toast('That backup isn\u2019t valid.')}};if(f){const rd=new FileReader();rd.onload=()=>apply(rd.result);rd.readAsText(f)}else if(val('rT'))apply(val('rT'));else toast('No backup provided.')}
 });
@@ -647,6 +669,7 @@ document.addEventListener('click',e=>{
  if(a==='mv'){const g=b.dataset.g,tabs=GBASE.find(x=>x[0]===g)[2],o=ordered(g,tabs),i=o.indexOf(id),j=i+(+b.dataset.d);if(j>=0&&j<o.length){[o[i],o[j]]=[o[j],o[i]];UI().order[g]=o;go()}return}
  if(a==='uireset'){ask('Reset all page names, order and hidden pages?',()=>{S.ui={g:{},t:{},hide:[],order:{}};go()});return}
  if(a==='mvdel'){ask('Delete this verse?',()=>{S.myVerses=S.myVerses.filter(v=>v.id!==id);go()});return}
+ if(a==='rmdel'){ask('Delete this reminder?',()=>{S.rems=S.rems.filter(x=>x.id!==id);go()});return}
  if(a==='edit'){openEdit(b.dataset.k,b.dataset.id);return}
  if(a==='vdone'){const x=S.vision.find(v=>v.id===id);x.done=!x.done;go()}
  if(a==='vdel')rm('vision','Delete this dream from your board?');
@@ -669,6 +692,8 @@ document.addEventListener('click',e=>{
  if(a==='tdel')rm('travel','Delete this destination?');
  if(a==='dlbk'){const bl=new Blob([JSON.stringify(S)],{type:'application/json'}),u=URL.createObjectURL(bl),l=document.createElement('a');l.href=u;l.download='sheila-space-backup-'+TODAY()+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);S.lastBackup=TODAY();save();toast('Backup downloaded.')}
  if(a==='logout'){logout();return}
+ if(a==='pushon'){enablePush();return}
+ if(a==='pushtest'){testPush();return}
  if(a==='copybk'){navigator.clipboard.writeText(JSON.stringify(S)).then(()=>toast('Backup copied!'),()=>{$('#bk').select();toast('Select all and copy it manually.')})}
  if(a==='hdel')ask('Delete this habit?',()=>{S.habits=S.habits.filter(h=>h.id!==id);go()});
  if(a==='htog'){const d=b.dataset.d,l=S.hlog[d]||[];S.hlog[d]=l.includes(id)?l.filter(x=>x!==id):[...l,id];go()}
@@ -711,6 +736,48 @@ document.addEventListener('change',e=>{
 document.addEventListener('input',e=>{if(e.target.id==='jS'){jq=e.target.value;const p=e.target.selectionStart;render();const s=$('#jS');s.focus();s.setSelectionRange(p,p)}});
 $('#themeBtn').onclick=()=>{S.theme=isDark()?'light':'dark';go()};
 addEventListener('hashchange',()=>{vOff=0;openJ=null;cPick=null;dPick=null;render();scrollTo(0,0)});
+
+// ===== Push notifications =====
+const VAPID='BLw0W8vpx4J1OFeilNqnS3t9xYogvNt3ZdXJzpzwDcODkbzeisiwMMk93zVneXLexS--jeKRHVMsHb5Kww_ZaWU';
+const NDEF={bills:true,tasks:true,dates:true,cycle:true,verse:true,verseT:'07:00',checkin:true,checkinT:'21:00',habits:false,habitsT:'20:00'};
+function NT(){S.notif=Object.assign({},NDEF,S.notif||{});return S.notif}
+const pushOK=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+const vapidKey=()=>{const b=VAPID.replace(/-/g,'+').replace(/_/g,'/'),r=atob(b+'='.repeat((4-b.length%4)%4));return Uint8Array.from(r,c=>c.charCodeAt(0))};
+async function pushState(){if(!pushOK())return 'unsupported';if(Notification.permission==='denied')return 'denied';try{const r=await navigator.serviceWorker.ready,sub=await r.pushManager.getSubscription();return sub?'on':'off'}catch(e){return 'off'}}
+async function showPushState(){const el=$('#nStat');if(!el)return;const st=await pushState(),b=$('#nOn');
+ el.textContent={unsupported:'This browser can’t show notifications. On iPhone, open the app from your Home Screen.',denied:'Notifications are blocked for this site. Allow them in your phone’s settings for this app, then come back.',on:'On for this device.',off:'Off for this device.'}[st];
+ if(b)b.textContent=st==='on'?'Refresh this device':'Turn on for this device'}
+async function enablePush(){
+ if(!pushOK())return toast('Notifications aren’t supported here. On iPhone, add the app to your Home Screen first.');
+ try{const p=await Notification.requestPermission();if(p!=='granted'){showPushState();return toast('Notifications were not allowed.')}
+  const r=await navigator.serviceWorker.ready;let sub=await r.pushManager.getSubscription();if(!sub)sub=await r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidKey()});
+  const j=sub.toJSON();await sb.from('push_subs').delete().eq('endpoint',j.endpoint);
+  const{error}=await sb.from('push_subs').insert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth});if(error)throw error;
+  lastSig='';syncReminders();toast('Notifications are on for this device.');showPushState()}
+ catch(e){toast('Couldn’t turn on notifications: '+errMsg(e))}}
+async function testPush(){try{const t=(await sb.auth.getSession()).data.session.access_token;const r=await fetch(SB_URL+'/functions/v1/push-send',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+t},body:'{"action":"test"}'});const j=await r.json();toast(j.sent?'Test sent. Check your notifications.':'No device is set up yet. Tap “Turn on for this device” first.')}catch(e){toast(errMsg(e))}}
+async function dropPush(){try{const r=await navigator.serviceWorker.ready,sub=await r.pushManager.getSubscription();if(sub){await sb.from('push_subs').delete().eq('endpoint',sub.endpoint);await sub.unsubscribe()}}catch(e){}}
+// Work out every upcoming notification from the (decrypted) data. Only these short texts go to the server.
+function buildReminders(){
+ const n=NT(),out=[],now=new Date(),lim=new Date(Date.now()+45*864e5);
+ const add=(src,d,title,body,url,repeat)=>{if(!d)return;if(!repeat&&(d<=now||d>lim))return;out.push({src,title:String(title).slice(0,120),body:String(body||'').slice(0,240),url,fire_at:d.toISOString(),repeat:repeat||null})};
+ const t=TODAY(),m0=t.slice(0,7),d2=new Date();d2.setMonth(d2.getMonth()+1);const m1=ymd(d2).slice(0,7);
+ if(n.bills)S.bills.forEach(b=>[m0,m1].forEach(m=>{if(b.paid[m])return;const dd=billDate(b,m);add('bill1:'+b.id+m,atLocal(addDays(dd,-1),'09:00'),'Bill due tomorrow',`${b.name} · ${peso(b.amt)} due ${nice(dd)}`,'#bills');add('bill0:'+b.id+m,atLocal(dd,'08:00'),'Bill due today',`${b.name} · ${peso(b.amt)}`,'#bills')}));
+ if(n.tasks){const by={};S.tasks.filter(x=>!x.done&&x.date>=t).forEach(x=>{if(x.time)add('task:'+x.id,atLocal(x.date,x.time),'Reminder: '+x.text,x.pri==='Important'?'Marked important':'From your planner','#planner');else(by[x.date]=by[x.date]||[]).push(x.text)});
+  Object.entries(by).forEach(([d,l])=>add('tasks:'+d,atLocal(d,'08:00'),l.length===1?'Today’s to-do':`${l.length} to-dos today`,l.join(' · '),'#planner'))}
+ if(n.dates)S.dates.forEach(x=>{const nx=nextOcc(x.date,x.yearly),yrs=x.yearly?(+nx.slice(0,4))-(+x.date.slice(0,4)):0;add('date3:'+x.id+nx,atLocal(addDays(nx,-3),'09:00'),`${x.title} in 3 days`,nice(nx),'#important');add('date0:'+x.id+nx,atLocal(nx,'08:00'),`Today: ${x.title}`,yrs>0?`${yrs} ${yrs===1?'year':'years'}! ❤`:'Have a beautiful day.','#important')});
+ if(n.cycle){const c=cycleInfo();if(c){add('cyc2:'+c.next,atLocal(addDays(c.next,-2),'09:00'),'Period expected in 2 days','Based on your cycle log. Be ready and be gentle with yourself.','#cycle');add('cyc0:'+c.next,atLocal(c.next,'08:00'),'Period expected today','Remember to log it when it starts.','#cycle')}}
+ if(n.verse){const V2=ALLV();for(let i=0;i<30;i++){const d=addDays(t,i),dt=parse(d),di=Math.floor((dt-new Date(dt.getFullYear(),0,0))/864e5),v=V2[di%V2.length];add('verse:'+d,atLocal(d,n.verseT),v[0],v[1],'#verse')}}
+ if(n.checkin){const d=atLocal(t,n.checkinT);if(d<=now)d.setDate(d.getDate()+1);add('checkin',d,'Evening check-in','How are you feeling today? Take a minute for your check-in and gratitude.','#wellness','daily')}
+ if(n.habits&&S.habits.length){const d=atLocal(t,n.habitsT);if(d<=now)d.setDate(d.getDate()+1);add('habits',d,'Your habits for today',S.habits.map(h=>h.name).join(' · '),'#habits','daily')}
+ (S.rems||[]).forEach(r=>{const d=nextRem(r);if(d)add('rem:'+r.id,d,r.title,r.note||'Reminder','#reminders',r.repeat||null)});
+ return out}
+let lastSig='',syncing=false;
+async function syncReminders(){
+ if(!ME||syncing)return;const rows=buildReminders(),sig=JSON.stringify(rows.map(r=>[r.src,r.fire_at,r.title,r.body,r.repeat]));if(sig===lastSig)return;
+ syncing=true;try{const{error:e1}=await sb.from('reminders').delete().eq('user_id',ME.id).is('sent_at',null);if(e1)throw e1;
+  if(rows.length){const{error:e2}=await sb.from('reminders').insert(rows);if(e2)throw e2}lastSig=sig}catch(e){console.warn('reminder sync failed',e)}syncing=false}
+
 // ===== Accounts, encryption and sync =====
 const SB_URL='https://yccwlaebuzsylovbupzx.supabase.co',SB_KEY='sb_publishable_h5Dce11JqBYHPwhrwMZLiQ_7w2WLzMv',FN=SB_URL+'/functions/v1/account';
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'ss-auth'}});
@@ -741,7 +808,7 @@ async function pushNow(){
  try{const c=await seal(DK,TE.encode(JSON.stringify(S)));const now=new Date().toISOString();
   try{localStorage.setItem(cacheK(),JSON.stringify({data:c.ct,iv:c.iv,at:now}));localStorage.setItem(dirtyK(),'1')}catch(e){}
   dirty=false;const{error}=await sb.from('vaults').update({data:c.ct,data_iv:c.iv,updated_at:now}).eq('user_id',ME.id);
-  if(error)throw error;try{localStorage.removeItem(dirtyK())}catch(e){}status('Saved')}
+  if(error)throw error;try{localStorage.removeItem(dirtyK())}catch(e){}status('Saved');syncReminders()}
  catch(e){dirty=true;status('Offline · will sync later')}
  saving=false;if(dirty&&navigator.onLine)saveT=setTimeout(pushNow,5000)}
 save=()=>{dirty=true;clearTimeout(saveT);saveT=setTimeout(pushNow,1200);status('Saving…');return true};
@@ -764,7 +831,7 @@ async function createVault(pw,name,imported){
  const{error}=await sb.from('vaults').upsert({user_id:ME.id,salt:b64(salt),iter:310000,wk_pw:a.ct,iv_pw:a.iv,rec_salt:b64(rsalt),wk_rec:b.ct,iv_rec:b.iv,data:c.ct,data_iv:c.iv,updated_at:new Date().toISOString()});
  if(error)throw error;return rec}
 async function rawFromPw(v,pw){return open_(await kdf(pw,ub64(v.salt),v.iter),v.wk_pw,v.iv_pw)}
-async function enterApp(remember){if(remember)await kv('put',ME.id,DK);$('#auth').hidden=true;$('#app').hidden=false;location.hash=location.hash||'#home';render();status('Saved')}
+async function enterApp(remember){setTimeout(()=>{lastSig='';syncReminders()},1500);if(remember)await kv('put',ME.id,DK);$('#auth').hidden=true;$('#app').hidden=false;location.hash=location.hash||'#home';render();status('Saved')}
 function oldLocal(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
 
 const AV={};
@@ -820,7 +887,7 @@ $('#auth').addEventListener('click',async e=>{
  if(v==='rdone'&&afterRec){const n=afterRec;afterRec=null;pendingRec='';n()}});
 $('#auth').addEventListener('change',e=>{if(e.target.id==='rOk')$('#rDone').disabled=!e.target.checked});
 function dl(name,text,type){const u=URL.createObjectURL(new Blob([text],{type})),l=document.createElement('a');l.href=u;l.download=name;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-async function logout(){try{await pushNow()}catch(e){}if(ME)await kv('del',ME.id);try{if(ME){localStorage.removeItem(cacheK());localStorage.removeItem(dirtyK())}}catch(e){}await sb.auth.signOut().catch(()=>{});ME=null;DK=null;S=DEF();dirty=false;history.replaceState(null,'',location.pathname);showAuth('login')}
+async function logout(){try{await pushNow()}catch(e){}await dropPush();lastSig='';if(ME)await kv('del',ME.id);try{if(ME){localStorage.removeItem(cacheK());localStorage.removeItem(dirtyK())}}catch(e){}await sb.auth.signOut().catch(()=>{});ME=null;DK=null;S=DEF();dirty=false;history.replaceState(null,'',location.pathname);showAuth('login')}
 // settings-side account actions
 async function changePw(cur,nw){const{data:v,error}=await sb.from('vaults').select('*').eq('user_id',ME.id).single();if(error)throw error;let raw;try{raw=await rawFromPw(v,cur)}catch(x){throw new Error('Current password is wrong.')}
  const{error:e1}=await sb.auth.updateUser({password:nw});if(e1)throw e1;const salt=rnd(16),a=await seal(await kdf(nw,salt,310000),raw);
